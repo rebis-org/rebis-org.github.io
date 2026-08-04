@@ -1,0 +1,25 @@
+---
+import type { Header } from "../site";
+import Citation from "./Citation.astro";
+
+interface Props {
+	readonly header?: Header | undefined;
+	readonly class?: string | undefined;
+}
+const { header, class: className } = Astro.props;
+---
+
+<section class:list={["page-layout", className]}>
+  {header && (
+    <header class="page-header">
+      <h1 class="page-title text-primary font-bold">{header.title}</h1>
+      <p class="page-subtitle text-secondary">{header.subtitle}</p>
+      {header.citation && (
+        <p class="page-citation">
+          <Citation parts={header.citation} />
+        </p>
+      )}
+    </header>
+  )}
+  <slot />
+</section>

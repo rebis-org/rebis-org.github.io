@@ -1,0 +1,66 @@
+---
+import { githubMembers, githubOrganization } from "../../content";
+import { type Locale, translate } from "../../i18n";
+import Layout from "../../layouts/Layout.astro";
+import { external } from "../../link";
+import { header, pages, social } from "../../site";
+import Citation from "../Citation.astro";
+import Item from "../Item.astro";
+import Page from "../Page.astro";
+import Section from "../Section.astro";
+
+interface Props {
+	readonly locale: Locale;
+}
+const { locale } = Astro.props;
+const [organization, members] = await Promise.all([
+	githubOrganization(),
+	githubMembers(),
+]);
+---
+
+<Layout seo={pages.about.seo} {locale}>
+  <Page header={header(locale, "about")}>
+    <Section title={translate(locale, "section.name")}>
+      <div class="space-y-8">
+        {
+          pages.about.name.map(({ term, quotes }) => (
+            <div class="space-y-3">
+              <h3 class="text-primary text-lg font-semibold">{term}</h3>
+              {quotes.map(({ text, source }) => (
+                <blockquote class="text-secondary border-secondary space-y-1 border-s-2 ps-4">
+                  <p>{text}</p>
+                  <footer class="text-xs"><Citation parts={source} /></footer>
+                </blockquote>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </Section>
+    <Section title={translate(locale, "section.members")}>
+      <div class="section-items--members grid grid-cols-1">
+        {
+          members.map((member) => (
+            <Item
+              variant="resume"
+              link={external(member.url)}
+              title={member.name}
+              description={`@${member.login}`}
+              meta="GitHub"
+            />
+          ))
+        }
+      </div>
+    </Section>
+    <Section title={translate(locale, "section.connect")}>
+      <div class="social-grid">
+        {
+          social(organization?.email).map(({ title, link, icon }) => (
+            <Item variant="social-box" link={link} title={title} icon={icon} />
+          ))
+        }
+      </div>
+    </Section>
+  </Page>
+</Layout>

@@ -1,0 +1,31 @@
+---
+import { posts } from "../../content";
+import type { Locale } from "../../i18n";
+import Layout from "../../layouts/Layout.astro";
+import { localized } from "../../link";
+import { header, pages } from "../../site";
+import Item from "../Item.astro";
+import Page from "../Page.astro";
+
+interface Props {
+	readonly locale: Locale;
+}
+const { locale } = Astro.props;
+const items = await posts(locale);
+---
+
+<Layout seo={pages.blog.seo} {locale}>
+  <Page header={header(locale, "blog")}>
+    <div class="grid grid-cols-1 gap-6">
+      {items.map((post) => (
+        <Item
+          variant="card"
+          link={localized(locale, `/blog/${post.id}`)}
+          title={post.title}
+          description={post.description}
+          meta={post.date}
+        />
+      ))}
+    </div>
+  </Page>
+</Layout>

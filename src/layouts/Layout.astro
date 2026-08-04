@@ -1,0 +1,223 @@
+---
+import { Font, Image } from "astro:assets";
+import { Sun } from "lucide";
+import Icon from "../components/Icon.astro";
+import { githubOrganization } from "../content";
+import { localeTag, type Locale, translate } from "../i18n";
+import {
+	absolute,
+	href,
+	linkAttributes,
+	localized,
+	localizedFile,
+	path,
+	route as currentRoute,
+} from "../link";
+import { navigation, type Seo, site } from "../site";
+import "katex/dist/katex.min.css";
+import "../styles/global.css";
+
+interface Props {
+	readonly seo: Seo;
+	readonly locale: Locale;
+}
+
+const { seo, locale } = Astro.props;
+const organization = await githubOrganization();
+const links = navigation(locale);
+const localRoute = currentRoute(Astro.url);
+const alternateLocale: Locale = locale === "en-us" ? "zh-cn" : "en-us";
+const canonical = absolute(Astro.url.pathname, Astro.url);
+const alternate = absolute(
+	href(localized(alternateLocale, localRoute)),
+	Astro.url,
+);
+const defaultLocaleUrl =
+	locale === "en-us"
+		? canonical
+		: absolute(href(localized("en-us", localRoute)), Astro.url);
+const rssUrl = absolute(href(localizedFile(locale, "rss.xml")), Astro.url);
+const logoLink = href(localized(locale, "/"));
+const language = localeTag(locale);
+const alternateLanguage = localeTag(alternateLocale);
+const navigationClass =
+	"interactive-link text-secondary flex h-8 items-center justify-center px-2 font-medium text-[0.925rem]";
+---
+
+<html lang={language}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      const stored = localStorage.getItem("theme");
+      document.documentElement.dataset.theme =
+        stored ??
+        (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    </script>
+    <link rel="icon" type="image/svg+xml" href={path("/favicon.svg")} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{seo.title}</title>
+    <meta name="description" content={seo.description} />
+    <meta property="og:title" content={seo.title} />
+    <meta property="og:description" content={seo.description} />
+    <meta property="og:image" content={absolute(path(seo.image), Astro.url)} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seo.title} />
+    <meta name="twitter:description" content={seo.description} />
+    <meta name="twitter:image" content={absolute(path(seo.image), Astro.url)} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={language} href={canonical} />
+    <link rel="alternate" hreflang={alternateLanguage} href={alternate} />
+    <link rel="alternate" hreflang="x-default" href={defaultLocaleUrl} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} Blog (${language})`}
+      href={rssUrl}
+    />
+    <Font cssVariable="--font-noto-sans" preload />
+    <Font cssVariable="--font-noto-sans-sc" />
+    <Font cssVariable="--font-maple-mono" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">
+      {translate(locale, "accessibility.skipToMain")}
+    </a>
+    <header>
+      <div
+        class="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-y-2 px-6 py-5 sm:flex-nowrap"
+      >
+        <a href={logoLink} aria-label="Home" data-astro-prefetch>
+          <Image
+            src={path(site.logo.light)}
+            alt=""
+            width={721}
+            height={1479}
+            loading="eager"
+            class="site-logo site-logo-light h-[52px] w-auto object-contain"
+          />
+          <Image
+            src={path(site.logo.dark)}
+            alt=""
+            aria-hidden="true"
+            width={721}
+            height={1479}
+            loading="eager"
+            class="site-logo site-logo-dark h-[52px] w-auto object-contain"
+          />
+        </a>
+        <nav class="site-navigation w-full sm:w-auto">
+          <ul class="grid grid-cols-3 items-center gap-1 sm:flex sm:gap-4">
+            {links.map(({ title, link }) => (
+              <li>
+                <a
+                  class={navigationClass}
+                  href={href(link)}
+                  {...linkAttributes(link)}
+                  data-astro-prefetch
+                >
+                  {title}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a
+                class={navigationClass}
+                href={alternate}
+                hreflang={alternateLocale}
+                data-astro-prefetch
+              >
+                {alternateLocale === "en-us" ? "EN" : "中文"}
+              </a>
+            </li>
+            <li>
+              <button
+                id="theme-toggle"
+                class:list={["theme-toggle", navigationClass]}
+                type="button"
+                aria-label={translate(locale, "accessibility.switchToDark")}
+                data-light-mode-label={translate(
+                  locale,
+                  "accessibility.switchToLight",
+                )}
+                data-dark-mode-label={translate(
+                  locale,
+                  "accessibility.switchToDark",
+                )}
+              >
+                <Icon icon={Sun} size={16} id="theme-icon" />
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main-content" tabindex="-1" class="mb-24">
+      <slot />
+    </main>
+    <footer class="border-secondary mt-16 border-t py-8">
+      <div
+        class="mx-auto flex max-w-2xl flex-col gap-4 px-6 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p class="text-secondary text-sm font-medium">
+          © {new Date().getFullYear()} {organization?.name ?? "N/A"}
+        </p>
+        <div class="flex flex-wrap gap-x-6 gap-y-2">
+          {links.map(({ title, link }) => (
+            <a
+              href={href(link)}
+              {...linkAttributes(link)}
+              class="interactive-link text-secondary text-sm font-medium"
+              data-astro-prefetch
+            >
+              {title}
+            </a>
+          ))}
+        </div>
+      </div>
+    </footer>
+  </body><script>
+    import { observeMermaid, renderMermaid } from "../mermaid";
+    import { initMorph } from "../styles/morph";
+    import {
+      currentTheme,
+      installThemeToggle,
+      onThemeChange,
+    } from "../theme";
+
+    const panguValues = [
+      "normal",
+      "no-autospace",
+      "ideograph-alpha",
+      "ideograph-numeric",
+      "insert",
+      "replace",
+      "ideograph-alpha ideograph-numeric punctuation",
+      "ideograph-alpha ideograph-numeric",
+      "ideograph-alpha ideograph-numeric insert",
+      "auto",
+    ];
+    const hasPangu = panguValues.some((value) =>
+      CSS.supports("text-autospace", value),
+    );
+    let pangu: Promise<(typeof import("pangu/browser"))["default"]> | undefined;
+    const spaceText = async (): Promise<void> => {
+      if (hasPangu || !document.body) return;
+      pangu ??= import("pangu/browser").then(({ default: instance }) => instance);
+      (await pangu).spacingNode(document.body);
+    };
+
+    const boot = (): void => {
+      installThemeToggle();
+      initMorph();
+      observeMermaid(currentTheme());
+      void spaceText();
+    };
+
+    boot();
+    document.addEventListener("astro:page-load", boot);
+    onThemeChange(renderMermaid);
+  </script>
+</html>

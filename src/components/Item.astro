@@ -1,0 +1,146 @@
+---
+import { ArrowRight, ArrowUpRight, ExternalLink } from "lucide";
+import type { IconInput } from "morphicons";
+import { href, linkAttributes, type Link } from "../link";
+import type { Detail } from "../site";
+import Icon from "./Icon.astro";
+
+type Common = Readonly<{ link?: Link | undefined; class?: string }>;
+type Props =
+	| (Common &
+			Readonly<{
+				variant: "card";
+				title: string;
+				meta?: string;
+				description?: string | undefined;
+				details?: readonly Detail[];
+			}>)
+	| (Common &
+			Readonly<{
+				variant: "resume";
+				title: string;
+				description: string;
+				meta: string;
+			}>)
+	| (Common & Readonly<{ variant: "social"; title: string; icon: IconInput }>)
+	| (Common &
+			Readonly<{ variant: "social-box"; title: string; icon: IconInput }>)
+	| (Common & Readonly<{ variant: "link"; title: string }>);
+
+const props: Props = Astro.props;
+const Element = props.link ? "a" : "span";
+const address = props.link ? href(props.link) : undefined;
+const attributes = props.link
+	? { href: address, ...linkAttributes(props.link) }
+	: {};
+const external = props.link?.kind === "external";
+const prefetch =
+	address && !external && !address.startsWith("#") ? true : undefined;
+const morph =
+	props.link && (props.variant === "social-box" || props.variant === "link");
+const arrow = external ? ExternalLink : ArrowRight;
+---
+
+<Element
+  {...attributes}
+  data-astro-prefetch={prefetch}
+  data-morph={morph ? "" : undefined}
+  aria-label={props.variant === "social" || external ? props.title : undefined}
+  class:list={[
+    props.class,
+    { "interactive-link": Boolean(props.link) },
+    { "flex py-4": props.variant === "card" },
+    { "resume-item": props.variant === "resume" },
+    { "social-item": props.variant === "social-box" },
+    {
+      "link-button flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium":
+        props.variant === "link",
+    },
+  ]}
+>
+  {
+    props.variant === "card" && (
+      <div class="flex-grow pr-4">
+        <div class="mb-2 flex items-center gap-2">
+          <h2 class="text-primary text-lg font-semibold">{props.title}</h2>
+          {props.meta && (
+            <span class="text-secondary rounded-full px-2 py-0.5 text-xs font-medium">
+              {props.meta}
+            </span>
+          )}
+        </div>
+        {props.description && (
+          <div class="text-secondary text-sm leading-relaxed">
+            {props.description}
+          </div>
+        )}
+        {props.details && (
+          <div class="text-secondary mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-relaxed">
+            {props.details.map((detail) => (
+              <span
+                class="flex items-center gap-1.5"
+                aria-label={`${detail.label}: ${detail.value}`}
+              >
+                {detail.icon && <Icon icon={detail.icon} size={16} />}
+                {detail.value}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+  {
+    props.variant === "resume" && (
+      <>
+        <div>
+          <h3 class="resume-title text-primary font-semibold">{props.title}</h3>
+          <p class="resume-description text-secondary">{props.description}</p>
+        </div>
+        <p class="resume-meta text-secondary font-medium">{props.meta}</p>
+      </>
+    )
+  }
+  {
+    props.variant === "social" && (
+      <div class="bg-transparent flex h-12 w-12 items-center justify-center rounded-full">
+        <Icon icon={props.icon} size={22} class="text-secondary" />
+      </div>
+    )
+  }
+  {
+    props.variant === "social-box" && (
+      <>
+        <div class="social-icon bg-transparent rounded-full">
+          <Icon icon={props.icon} size={18} class="text-primary" />
+        </div>
+        <div class="flex w-full items-center justify-between">
+          <span class="text-primary inline-flex items-center text-sm font-medium">
+            {props.title}
+          </span>
+          {props.link && (
+            <Icon
+              icon={ArrowRight}
+              size={16}
+              class="text-secondary"
+              morphTo={ArrowUpRight}
+            />
+          )}
+        </div>
+      </>
+    )
+  }
+  {
+    props.variant === "link" && (
+      <>
+        {props.title}
+        <Icon
+          icon={arrow}
+          size={12}
+          class="text-secondary"
+          morphTo={props.link ? ArrowUpRight : undefined}
+        />
+      </>
+    )
+  }
+</Element>

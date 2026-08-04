@@ -1,0 +1,33 @@
+---
+import { githubProjects } from "../../content";
+import type { Locale } from "../../i18n";
+import Layout from "../../layouts/Layout.astro";
+import { external } from "../../link";
+import { header, pages, projectDetails } from "../../site";
+import Item from "../Item.astro";
+import Page from "../Page.astro";
+
+interface Props {
+	readonly locale: Locale;
+}
+const { locale } = Astro.props;
+const items = (await githubProjects()).filter((project) => project.license);
+---
+
+<Layout seo={pages.projects.seo} {locale}>
+  <Page header={header(locale, "projects")}>
+    <div class="grid grid-cols-1 gap-6">
+      {
+        items.map((project) => (
+          <Item
+            variant="card"
+            link={external(project.url)}
+            title={project.title}
+            description={project.description}
+            details={projectDetails(project, locale)}
+          />
+        ))
+      }
+    </div>
+  </Page>
+</Layout>

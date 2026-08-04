@@ -1,0 +1,19 @@
+---
+import { href, linkAttributes } from "../link";
+import type { Citation } from "../site";
+
+interface Props {
+	readonly parts: Citation;
+}
+const { parts } = Astro.props;
+---
+
+{parts.map((part) =>
+  part.kind === "text" ? (
+    part.value
+  ) : part.kind === "emphasis" ? (
+    <em>{part.value}</em>
+  ) : (
+    <a href={href(part.href)} {...linkAttributes(part.href)}>{part.label}</a>
+  ),
+)}

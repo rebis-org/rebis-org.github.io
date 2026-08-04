@@ -1,0 +1,53 @@
+{
+	"name": "rebis-org.github.io",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "astro build",
+		"check": "astro check",
+		"dev": "astro dev",
+		"fmt": "biome format --write astro.config.ts package.json src .github",
+		"fmt:check": "biome format astro.config.ts package.json src .github",
+		"lint": "biome lint astro.config.ts src/*.ts src/*/*.ts src/*/*/*.ts",
+		"quality": "biome check astro.config.ts src/*.ts src/*/*.ts src/*/*/*.ts",
+		"preview": "astro preview"
+	},
+	"dependencies": {
+		"@astrojs/markdown-satteri": "^0.3.5",
+		"@astrojs/mdx": "^7.0.5",
+		"@astrojs/rss": "^4.0.19",
+		"@astrojs/sitemap": "^3.7.3",
+		"@shikijs/transformers": "^4.4.1",
+		"@unocss/astro": "66.7.5",
+		"@unocss/preset-typography": "66.7.5",
+		"@unocss/preset-wind3": "66.7.5",
+		"astro": "7.1.6",
+		"feather-icons": "^4.29.2",
+		"katex": "^0.18.1",
+		"lucide": "^1.28.0",
+		"mermaid": "^11.16.0",
+		"morphicons": "^1.2.0",
+		"pangu": "9.1.0",
+		"satteri": "^0.9.5",
+		"unocss": "66.7.5"
+	},
+	"devDependencies": {
+		"@astrojs/check": "0.9.10",
+		"@biomejs/biome": "2.5.6",
+		"@types/node": "^26.1.2",
+		"lightningcss": "^1.33.0",
+		"typescript": "6.0.3"
+	},
+	"devEngines": {
+		"packageManager": {
+			"name": "nub",
+			"version": "^0.6.0",
+			"onFail": "warn"
+		}
+	},
+	"allowBuilds": {
+		"esbuild": true,
+		"lightningcss": true,
+		"core-js": true
+	}
+}

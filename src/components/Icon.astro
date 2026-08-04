@@ -1,0 +1,51 @@
+---
+import type { IconInput } from "morphicons";
+import { canonicalD } from "morphicons/dom";
+
+interface Props {
+	readonly icon: IconInput;
+	readonly size?: number | string;
+	readonly class?: string;
+	readonly id?: string;
+	readonly label?: string;
+	readonly strokeWidth?: number | string;
+	readonly stroke?: string;
+	readonly fill?: string;
+	readonly morphTo?: IconInput | undefined;
+}
+
+const {
+	icon,
+	size = "1em",
+	id,
+	label,
+	strokeWidth = 2,
+	stroke = "currentColor",
+	fill = "none",
+	morphTo,
+	class: className,
+} = Astro.props;
+
+const path = canonicalD(icon);
+const morphPath = morphTo === undefined ? undefined : canonicalD(morphTo);
+---
+
+<svg
+  viewBox="0 0 24 24"
+  width={size}
+  height={size}
+  fill={fill}
+  stroke={stroke}
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  role={label ? "img" : undefined}
+  aria-hidden={label ? undefined : "true"}
+  class={className}
+  id={id}
+  data-morph-from={morphPath === undefined ? undefined : path}
+  data-morph-to={morphPath}
+>
+  {label ? <title>{label}</title> : null}
+  <path d={path} data-morph-path></path>
+</svg>
