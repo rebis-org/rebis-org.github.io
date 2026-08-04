@@ -1,0 +1,33 @@
+---
+import { translate, type Locale } from "../../i18n";
+import Layout from "../../layouts/Layout.astro";
+import { href, localized } from "../../link";
+import { type Seo, site } from "../../site";
+import Page from "../Page.astro";
+
+interface Props {
+	readonly code: "404" | "500";
+	readonly locale: Locale;
+}
+const { code, locale } = Astro.props;
+const title = translate(locale, `error.${code}.title`);
+const subtitle = translate(locale, `error.${code}.subtitle`);
+const message = translate(locale, `error.${code}.message`);
+const home = localized(locale, "/");
+const seo: Seo = {
+	title: `${title} | ${site.name}`,
+	description: message,
+	image: site.logo.light,
+};
+---
+
+<Layout seo={seo} {locale}>
+  <Page header={{ title, subtitle }}>
+    <p class="text-secondary mb-8 max-w-md text-base leading-relaxed">
+      {message}
+    </p>
+    <a href={href(home)} class="interactive-link text-sm font-medium">
+      {translate(locale, "error.home")}
+    </a>
+  </Page>
+</Layout>

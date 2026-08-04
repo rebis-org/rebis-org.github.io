@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Redirecting</title>
+    <script>
+      const base = import.meta.env.BASE_URL;
+      const languages = navigator.languages ?? [navigator.language];
+      const locale = languages.some((value) =>
+        /^zh-(cn|hans)(?:-|$)/i.test(value),
+      )
+        ? "zh-cn"
+        : "en-us";
+      location.replace(`${base}${locale}/`);
+    </script>
+    <noscript><meta http-equiv="refresh" content="0; url=/en-us/" /></noscript>
+  </head>
+</html>

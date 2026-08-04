@@ -1,0 +1,26 @@
+---
+import type { Locale } from "../i18n";
+import { localized } from "../link";
+import type { Article } from "../site";
+import Item from "./Item.astro";
+
+interface Props {
+	readonly posts: readonly Article[];
+	readonly locale: Locale;
+}
+const { posts, locale } = Astro.props;
+---
+
+<div class="grid grid-cols-1 gap-6">
+  {
+    posts.map((post) => (
+      <Item
+        variant="card"
+        link={localized(locale, `/blog/${post.id}`)}
+        title={post.title}
+        description={post.description}
+        meta={post.date}
+      />
+    ))
+  }
+</div>

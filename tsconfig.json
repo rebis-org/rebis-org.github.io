@@ -1,0 +1,7 @@
+{
+	"extends": "astro/tsconfigs/strictest",
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM", "DOM.Iterable"]
+	},
+	"include": [".astro/types.d.ts", "src", "astro.config.ts"]
+}

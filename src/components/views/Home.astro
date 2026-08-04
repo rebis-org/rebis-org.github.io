@@ -1,0 +1,32 @@
+---
+import { githubOrganization } from "../../content";
+import type { Locale } from "../../i18n";
+import Layout from "../../layouts/Layout.astro";
+import { homeHeader, pages, social } from "../../site";
+import Item from "../Item.astro";
+import Page from "../Page.astro";
+
+interface Props {
+	readonly locale: Locale;
+}
+const { locale } = Astro.props;
+const organization = await githubOrganization();
+---
+
+<Layout seo={pages.home.seo} {locale}>
+  <Page header={homeHeader(organization)}>
+    <div class="mb-8 flex flex-row items-center gap-2">
+      {
+        social(organization?.email).map(({ title, link, icon }) => (
+          <Item variant="social" link={link} icon={icon} title={title} />
+        ))
+      }
+    </div>
+    <h2 class="text-primary text-lg font-semibold">{pages.home.hero.title}</h2>
+    <ul
+      class="text-primary max-w-md list-inside list-disc space-y-2 text-base leading-relaxed"
+    >
+      {pages.home.hero.items.map((item) => <li>{item}</li>)}
+    </ul>
+  </Page>
+</Layout>

@@ -1,0 +1,255 @@
+---
+import { Font, Image } from "astro:assets";
+import { Sun } from "lucide";
+import Icon from "../components/Icon.astro";
+import { githubOrganization } from "../content";
+import { type Locale, translate } from "../i18n";
+import { href, linkAttributes, localized, path } from "../link";
+import { navigation, type Seo, site } from "../site";
+import "katex/dist/katex.min.css";
+import "../styles/global.css";
+
+interface Props {
+	readonly seo: Seo;
+	readonly locale: Locale;
+}
+const { seo, locale } = Astro.props;
+const organization = await githubOrganization();
+const organizationName = organization?.name ?? "N/A";
+const url = (value: string): string => new URL(value, Astro.url).href;
+const route =
+	Astro.url.pathname
+		.replace(import.meta.env.BASE_URL.replace(/\/$/, ""), "")
+		.replace(/^\/(?:en-us|zh-cn)(?=\/|$)/, "") || "/";
+const alternateLocale: Locale = locale === "en-us" ? "zh-cn" : "en-us";
+const alternate = href(localized(alternateLocale, route));
+const languageTag = locale === "zh-cn" ? "zh-CN" : "en-US";
+const alternateLanguageTag = alternateLocale === "zh-cn" ? "zh-CN" : "en-US";
+const defaultLocaleUrl = url(
+	locale === "en-us" ? Astro.url.pathname : href(localized("en-us", route)),
+);
+const rssUrl = url(`${import.meta.env.BASE_URL}${locale}/rss.xml`);
+const logoLink = href(localized(locale, "/"));
+const navigationClass =
+	"interactive-link text-secondary flex h-8 items-center justify-center px-2 font-medium text-[0.925rem]";
+---
+
+<html lang={languageTag}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      const stored = localStorage.getItem("theme");
+      document.documentElement.dataset.theme =
+        stored ??
+        (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    </script>
+    <link rel="icon" type="image/svg+xml" href={path("/favicon.svg")} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{seo.title}</title>
+    <meta name="description" content={seo.description} />
+    <meta property="og:title" content={seo.title} />
+    <meta property="og:description" content={seo.description} />
+    <meta property="og:image" content={url(path(seo.image))} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={url(Astro.url.pathname)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seo.title} />
+    <meta name="twitter:description" content={seo.description} />
+    <meta name="twitter:image" content={url(path(seo.image))} />
+    <link rel="canonical" href={url(Astro.url.pathname)} />
+    <link
+      rel="alternate"
+      hreflang={languageTag}
+      href={url(Astro.url.pathname)}
+    />
+    <link
+      rel="alternate"
+      hreflang={alternateLanguageTag}
+      href={url(alternate)}
+    />
+    <link rel="alternate" hreflang="x-default" href={defaultLocaleUrl} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} Blog (${languageTag})`}
+      href={rssUrl}
+    />
+    <Font cssVariable="--font-noto-sans" preload />
+    <Font cssVariable="--font-noto-sans-sc" />
+    <Font cssVariable="--font-maple-mono" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">
+      {translate(locale, "accessibility.skipToMain")}
+    </a>
+    <header>
+      <div
+        class="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-y-2 px-6 py-5 sm:flex-nowrap"
+      >
+        <a href={logoLink} aria-label="Home" data-astro-prefetch>
+          <Image
+            src={path(site.logo.light)}
+            alt=""
+            width={721}
+            height={1479}
+            loading="eager"
+            class="site-logo site-logo-light h-[52px] w-auto object-contain"
+          />
+          <Image
+            src={path(site.logo.dark)}
+            alt=""
+            aria-hidden="true"
+            width={721}
+            height={1479}
+            loading="eager"
+            class="site-logo site-logo-dark h-[52px] w-auto object-contain"
+          />
+        </a>
+        <nav class="site-navigation w-full sm:w-auto">
+          <ul class="grid grid-cols-3 items-center gap-1 sm:flex sm:gap-4">
+            {
+              navigation(locale).map(({ title, link }) => (
+                <li>
+                  <a
+                    class={navigationClass}
+                    href={href(link)}
+                    {...linkAttributes(link)}
+                    data-astro-prefetch
+                  >
+                    {title}
+                  </a>
+                </li>
+              ))
+            }
+            <li>
+              <a
+                class={navigationClass}
+                href={alternate}
+                hreflang={alternateLocale}
+                data-astro-prefetch
+              >
+                {alternateLocale === "en-us" ? "EN" : "中文"}
+              </a>
+            </li>
+            <li>
+              <button
+                id="theme-toggle"
+                class:list={["theme-toggle", navigationClass]}
+                type="button"
+                aria-label={translate(locale, "accessibility.switchToDark")}
+                data-light-mode-label={translate(
+                  locale,
+                  "accessibility.switchToLight",
+                )}
+                data-dark-mode-label={translate(
+                  locale,
+                  "accessibility.switchToDark",
+                )}
+              >
+                <Icon icon={Sun} size={16} id="theme-icon" />
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main-content" tabindex="-1" class="mb-24">
+      <slot />
+    </main>
+    <footer class="border-secondary mt-16 border-t py-8">
+      <div
+        class="mx-auto flex max-w-2xl flex-col gap-4 px-6 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p class="text-secondary text-sm font-medium">
+          © {new Date().getFullYear()} {organizationName}
+        </p>
+        <div class="flex flex-wrap gap-x-6 gap-y-2">
+          {
+            navigation(locale).map(({ title, link }) => (
+              <a
+                href={href(link)}
+                {...linkAttributes(link)}
+                class="interactive-link text-secondary text-sm font-medium"
+                data-astro-prefetch
+              >
+                {title}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </footer>
+  </body><script>
+    import { initMorph } from "../styles/morph";
+    import {
+      currentTheme,
+      installThemeToggle,
+      onThemeChange,
+      type Theme,
+    } from "../theme";
+
+    let diagrams: readonly { node: HTMLPreElement; source: string }[] = [];
+
+    const capture = (): void => {
+      diagrams = [
+        ...document.querySelectorAll<HTMLPreElement>("pre.mermaid"),
+      ].map((node) => ({ node, source: node.textContent ?? "" }));
+    };
+
+    const renderMermaid = async (theme: Theme): Promise<void> => {
+      if (diagrams.length === 0) return;
+      const { default: mermaid } = await import("mermaid");
+      diagrams.forEach(({ node, source }) =>
+        node.replaceChildren(document.createTextNode(source)),
+      );
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: theme === "dark" ? "dark" : "default",
+        themeVariables: {
+          background: theme === "dark" ? "#000000" : "#ffffff",
+          primaryColor: theme === "dark" ? "#202020" : "#ffffff",
+          primaryTextColor: theme === "dark" ? "#ffffff" : "#000000",
+          lineColor: "#808080",
+        },
+      });
+      await mermaid.run({ nodes: diagrams.map(({ node }) => node) });
+    };
+
+    const panguValues = [
+      "normal",
+      "no-autospace",
+      "ideograph-alpha",
+      "ideograph-numeric",
+      "insert",
+      "replace",
+      "ideograph-alpha ideograph-numeric punctuation",
+      "ideograph-alpha ideograph-numeric",
+      "ideograph-alpha ideograph-numeric insert",
+      "auto",
+    ];
+    const hasPangu = panguValues.some((value) =>
+      CSS.supports("text-autospace", value),
+    );
+    let pangu: Promise<(typeof import("pangu/browser"))["default"]> | undefined;
+    const spaceText = async (): Promise<void> => {
+      if (hasPangu || !document.body) return;
+      pangu ??= import("pangu/browser").then(
+        ({ default: instance }) => instance,
+      );
+      (await pangu).spacingNode(document.body);
+    };
+
+    const boot = (): void => {
+      installThemeToggle();
+      initMorph();
+      capture();
+      void renderMermaid(currentTheme());
+      void spaceText();
+    };
+
+    boot();
+    document.addEventListener("astro:page-load", boot);
+    onThemeChange((theme) => void renderMermaid(theme));
+  </script>
+</html>

@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
+import { article } from "../../content";
+import { type Locale, translate } from "../../i18n";
+import Layout from "../../layouts/Layout.astro";
+import { site } from "../../site";
+import Page from "../Page.astro";
+import TOC from "../TOC.astro";
+
+interface Props {
+	readonly entry: CollectionEntry<"posts">;
+	readonly locale: Locale;
+}
+const { entry, locale } = Astro.props;
+const { Content, headings } = await render(entry);
+const post = article(entry, locale);
+---
+
+<Layout
+  seo={{
+    title: post.title,
+    description:
+      post.description ?? `${post.title} - Blog post by ${site.name}`,
+    image: site.logo.light,
+  }}
+  {locale}
+>
+  <Page>
+    <div class="relative">
+      <aside
+        class="absolute right-[calc(100%+2rem)] top-0 hidden w-44 xl:block"
+      >
+        <TOC
+          headings={headings.filter(({ depth }) => depth > 1 && depth < 4)}
+          title={translate(locale, "toc.title")}
+        />
+      </aside>
+      <h1 class="text-primary mb-4 text-4xl font-bold">{post.title}</h1>
+      <p class="mb-6 text-lg opacity-70">{post.description}</p>
+      <div class="mb-6">
+        <p class="text-primary font-medium">{site.name}</p>
+        <p class="text-secondary text-sm">{post.date}</p>
+      </div>
+      <article
+        class="prose prose-headings:mb-2 prose-headings:text-primary prose-p:text-secondary prose-a:text-secondary prose-a:no-underline"
+      >
+        <Content />
+      </article>
+    </div>
+  </Page>
+</Layout>

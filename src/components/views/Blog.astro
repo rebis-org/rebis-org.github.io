@@ -1,0 +1,20 @@
+---
+import { posts } from "../../content";
+import type { Locale } from "../../i18n";
+import Layout from "../../layouts/Layout.astro";
+import { header, pages } from "../../site";
+import List from "../List.astro";
+import Page from "../Page.astro";
+
+interface Props {
+	readonly locale: Locale;
+}
+const { locale } = Astro.props;
+const items = await posts(locale);
+---
+
+<Layout seo={pages.blog.seo} {locale}>
+  <Page header={header(locale, "blog")}>
+    <List {locale} posts={items} />
+  </Page>
+</Layout>

@@ -1,0 +1,36 @@
+---
+import type { PageName, RouteProps } from "../../components/Route.astro";
+import Route from "../../components/Route.astro";
+import { postEntries, postId } from "../../content";
+import { type Locale, locales } from "../../i18n";
+
+type StaticPath = Readonly<{
+	readonly params: Readonly<{ locale: Locale; route?: string }>;
+	readonly props: RouteProps;
+}>;
+
+export const getStaticPaths = async (): Promise<readonly StaticPath[]> => {
+	const pages = [
+		"home",
+		"about",
+		"projects",
+		"blog",
+	] as const satisfies readonly PageName[];
+	const pagePaths = (locale: Locale): readonly StaticPath[] =>
+		pages.map((page) => ({
+			params: { locale, ...(page === "home" ? {} : { route: page }) },
+			props: { kind: "page", page, locale },
+		}));
+	const postPaths = async (locale: Locale): Promise<readonly StaticPath[]> =>
+		(await postEntries(locale)).map((entry) => ({
+			params: { locale, route: `blog/${postId(entry)}` },
+			props: { kind: "post", entry, locale },
+		}));
+	return [
+		...locales.flatMap(pagePaths),
+		...(await Promise.all(locales.map(postPaths))).flat(),
+	];
+};
+---
+
+<Route {...Astro.props} />

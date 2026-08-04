@@ -1,0 +1,15 @@
+---
+import type { Header as HeaderContent } from "../site";
+import Header from "./Header.astro";
+
+interface Props {
+	readonly header?: HeaderContent;
+	readonly class?: string;
+}
+const { header, class: className } = Astro.props;
+---
+
+<section class:list={["page-layout", className]}>
+  {header && <Header {...header} />}
+  <slot />
+</section>

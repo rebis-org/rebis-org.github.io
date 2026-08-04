@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from "astro:content";
+import type { Locale } from "../i18n";
+import About from "./views/About.astro";
+import Blog from "./views/Blog.astro";
+import Home from "./views/Home.astro";
+import Post from "./views/Post.astro";
+import Projects from "./views/Projects.astro";
+
+export type PageName = "home" | "about" | "projects" | "blog";
+export type RouteProps =
+	| Readonly<{ kind: "page"; page: PageName; locale: Locale }>
+	| Readonly<{ kind: "post"; entry: CollectionEntry<"posts">; locale: Locale }>;
+
+const views = {
+	home: Home,
+	about: About,
+	projects: Projects,
+	blog: Blog,
+} satisfies Record<PageName, typeof Home>;
+
+type Props = RouteProps;
+const props = Astro.props;
+const View = props.kind === "page" ? views[props.page] : undefined;
+---
+
+{
+  props.kind === "post" ? (
+    <Post entry={props.entry} locale={props.locale} />
+  ) : (
+    View && <View locale={props.locale} />
+  )
+}

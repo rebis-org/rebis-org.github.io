@@ -1,0 +1,33 @@
+---
+import { href, linkAttributes } from "../link";
+import type { CitationPart } from "../site";
+
+interface Props {
+	readonly title: string;
+	readonly subtitle: string;
+	readonly citation?: readonly CitationPart[] | undefined;
+}
+const { title, subtitle, citation } = Astro.props;
+---
+
+<header class="page-header">
+  <h1 class="page-title text-primary font-bold">{title}</h1>
+  <p class="page-subtitle text-secondary">{subtitle}</p>
+  {
+    citation && (
+      <p class="page-citation">
+        {citation.map((part) =>
+          part.kind === "text" ? (
+            part.value
+          ) : part.kind === "emphasis" ? (
+            <em>{part.value}</em>
+          ) : (
+            <a href={href(part.href)} {...linkAttributes(part.href)}>
+              {part.label}
+            </a>
+          ),
+        )}
+      </p>
+    )
+  }
+</header>
