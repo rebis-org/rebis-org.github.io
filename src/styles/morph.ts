@@ -1,9 +1,5 @@
 import { createMorph } from "morphicons/dom";
 
-const reducedMotion =
-	typeof window !== "undefined" &&
-	window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 export const initMorph = (root: ParentNode = document): void => {
 	for (const trigger of root.querySelectorAll<HTMLElement>("[data-morph]")) {
 		if (trigger.dataset.morphReady === "true") continue;
@@ -18,9 +14,8 @@ export const initMorph = (root: ParentNode = document): void => {
 
 		let morph: ReturnType<typeof createMorph> | undefined;
 		const transition = (target: string): void => {
-			morph ??= createMorph(path, from);
-			if (!reducedMotion) morph.morphTo(target);
-			else morph.set(target);
+			morph ??= createMorph(path, from, { reducedMotion: "user" });
+			morph.morphTo(target);
 		};
 		const enter = (): void => transition(to);
 		const leave = (): void => transition(from);

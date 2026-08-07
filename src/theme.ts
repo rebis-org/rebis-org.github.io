@@ -23,18 +23,17 @@ export const installThemeToggle = (root: ParentNode = document): void => {
 	if (!toggle || toggle.dataset.ready === "true") return;
 	toggle.dataset.ready = "true";
 	const path = root.querySelector<SVGPathElement>("#theme-icon path");
-	const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 	let morph: ReturnType<typeof createMorph> | undefined;
 
 	const paint = (theme: Theme, from: Theme, animate: boolean): void => {
 		if (!path) return;
 		const target = icon(theme);
-		if (!animate || reducedMotion) {
-			morph ??= createMorph(path, target);
+		if (!animate) {
+			morph ??= createMorph(path, target, { reducedMotion: "user" });
 			morph.set(target);
 			return;
 		}
-		morph ??= createMorph(path, icon(from));
+		morph ??= createMorph(path, icon(from), { reducedMotion: "user" });
 		morph.morphTo(target);
 	};
 
