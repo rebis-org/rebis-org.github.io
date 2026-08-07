@@ -30,7 +30,6 @@ export const installThemeToggle = (root: ParentNode = document): void => {
 		const target = icon(theme);
 		if (!animate) {
 			morph ??= createMorph(path, target, { reducedMotion: "user" });
-			morph.set(target);
 			return;
 		}
 		morph ??= createMorph(path, icon(from), { reducedMotion: "user" });
