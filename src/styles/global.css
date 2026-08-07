@@ -289,11 +289,79 @@ html[data-theme="dark"] .site-logo-dark {
 }
 .mermaid {
 	background: var(--background);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-block: var(--space-8);
+	min-height: var(--space-16);
+	position: relative;
+	visibility: hidden;
+}
+.mermaid:not([data-processed])::after {
+	content: "";
+	width: 1.5rem;
+	height: 1.5rem;
+	border: 2px solid var(--muted);
+	border-top-color: var(--ink);
+	border-radius: 50%;
+	animation: mermaid-spin 0.8s linear infinite;
+	visibility: visible;
+}
+.mermaid[data-processed] {
+	visibility: visible;
+}
+.mermaid[data-processed]::after {
+	display: none;
 }
 .mermaid svg {
 	display: block;
 	max-inline-size: 100%;
 	height: auto;
+	background: transparent;
+}
+.mermaid[data-align="left"] {
+	justify-content: flex-start;
+}
+.mermaid[data-align="right"] {
+	justify-content: flex-end;
+}
+figure.mermaid-figure {
+	margin-block: var(--space-8);
+	text-align: center;
+}
+figure.mermaid-figure > pre.mermaid {
+	margin-block: 0;
+}
+figure.mermaid-figure > figcaption {
+	margin-top: var(--space-2);
+	font-size: var(--text-sm);
+	color: var(--muted);
+}
+.mermaid-error {
+	color: var(--ink);
+	padding: var(--space-4);
+	border: 1px solid var(--muted);
+	border-radius: 0.5rem;
+	text-align: left;
+}
+.mermaid-error p {
+	margin: 0 0 var(--space-2);
+}
+.mermaid-error p:last-of-type {
+	margin-bottom: 0;
+}
+.mermaid-error pre {
+	margin: var(--space-2) 0 0;
+	padding: var(--space-2);
+	background: color-mix(in srgb, var(--muted) 12%, transparent);
+	border-radius: 0.25rem;
+	overflow-x: auto;
+	font-size: var(--text-sm);
+}
+@keyframes mermaid-spin {
+	to {
+		transform: rotate(360deg);
+	}
 }
 .footnotes {
 	margin-block-start: 2rem;

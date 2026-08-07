@@ -179,13 +179,9 @@ const navigationClass =
       </div>
     </footer>
   </body><script>
-    import { observeMermaid, renderMermaid } from "../mermaid";
+    import { observeMermaid, observeTheme } from "../mermaid";
     import { initMorph } from "../styles/morph";
-    import {
-      currentTheme,
-      installThemeToggle,
-      onThemeChange,
-    } from "../theme";
+    import { installThemeToggle } from "../theme";
 
     const panguValues = [
       "normal",
@@ -212,12 +208,12 @@ const navigationClass =
     const boot = (): void => {
       installThemeToggle();
       initMorph();
-      observeMermaid(currentTheme());
+      observeMermaid();
       void spaceText();
     };
 
     boot();
     document.addEventListener("astro:page-load", boot);
-    onThemeChange(renderMermaid);
+    observeTheme();
   </script>
 </html>

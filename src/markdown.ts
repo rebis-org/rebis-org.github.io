@@ -49,11 +49,52 @@ export const diagrams = defineHastPlugin({
 			) {
 				return;
 			}
-			context.replaceNode(node, {
+			const meta = (
+				code as Readonly<{ data?: Readonly<{ meta?: string }> }>
+			).data?.meta;
+			const width = meta?.match(/\bw-(\d+)/)?.[1];
+			const height = meta?.match(/\bh-(\d+)/)?.[1];
+			const titleMatch = meta?.match(/\btitle=(?:"([^"]*)"|'([^']*)')/);
+			const title = titleMatch?.[1] ?? titleMatch?.[2];
+			const alignValue = meta?.match(/\balign=(left|right|center)\b/)?.[1];
+			const align =
+				alignValue === "left" ||
+				alignValue === "right" ||
+				alignValue === "center"
+					? alignValue
+					: undefined;
+			const source = context.textContent(code).replace(/\n$/, "");
+			const diagram: Element = {
 				type: "element",
 				tagName: "pre",
-				properties: { className: ["mermaid"] },
-				children: [{ type: "text", value: context.textContent(code) }],
+				properties: {
+					className: ["mermaid"],
+					...(width ? { "data-width": width } : {}),
+					...(height ? { "data-height": height } : {}),
+					...(align ? { "data-align": align } : {}),
+				},
+				children: [{ type: "text", value: source }],
+			};
+			if (!title) {
+				context.replaceNode(node, diagram);
+				return;
+			}
+			context.replaceNode(node, {
+				type: "element",
+				tagName: "figure",
+				properties: {
+					className: ["mermaid-figure"],
+					...(align ? { "data-align": align } : {}),
+				},
+				children: [
+					diagram,
+					{
+						type: "element",
+						tagName: "figcaption",
+						properties: {},
+						children: [{ type: "text", value: title }],
+					},
+				],
 			});
 		},
 	},

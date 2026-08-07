@@ -1,111 +1,189 @@
 import type { Theme } from "./theme";
 
-type Diagram = Readonly<{ node: HTMLPreElement; source: string }>;
+type MermaidModule = typeof import("mermaid");
+type Mermaid = MermaidModule["default"];
 
-const margin = "256px";
-const idle = (): void => {};
-let generation = 0;
-let visible: readonly Diagram[] = [];
-let requestedTheme: Theme = "light";
-let pending = false;
-let rendering: Promise<void> | undefined;
-let stopObserving: () => void = idle;
+const diagramColors = ({
+	ink,
+	paper,
+	muted,
+}: Readonly<{ ink: string; paper: string; muted: string }>) => ({
+	lineColor: muted,
+	textColor: ink,
+	arrowheadColor: muted,
+	primaryTextColor: ink,
+	titleColor: ink,
+	primaryColor: paper,
+	primaryBorderColor: muted,
+	mainBkg: paper,
+	nodeBkg: paper,
+	nodeBorder: muted,
+	clusterBkg: paper,
+	clusterBorder: muted,
+	edgeLabelBackground: paper,
+	actorBorder: muted,
+	actorBkg: paper,
+	actorLineColor: muted,
+	signalColor: ink,
+} as const);
 
-const render = async (): Promise<void> => {
-	const diagrams = visible;
-	const version = generation;
-	const theme = requestedTheme;
-	const current = (): boolean =>
-		version === generation && diagrams === visible && theme === requestedTheme;
-	pending = false;
-	const { default: mermaid } = await import("mermaid");
-	if (!current()) {
-		pending = true;
-		return;
+const palette = {
+	light: diagramColors({ ink: "#000000", paper: "#ffffff", muted: "#808080" }),
+	dark: diagramColors({ ink: "#ffffff", paper: "#000000", muted: "#808080" }),
+} as const;
+
+let mermaid: Mermaid | undefined;
+let initializedTheme: Theme | undefined;
+let lastTheme: Theme | undefined;
+let themeDebounce: ReturnType<typeof setTimeout> | undefined;
+let themeObserver: MutationObserver | undefined;
+
+const loadMermaid = async (): Promise<Mermaid> => {
+	if (!mermaid) mermaid = (await import("mermaid")).default;
+	return mermaid;
+};
+
+const ready = async (theme: Theme): Promise<Mermaid> => {
+	const instance = await loadMermaid();
+	if (initializedTheme !== theme) {
+		instance.initialize({
+			startOnLoad: false,
+			theme: theme === "dark" ? "dark" : "default",
+			themeVariables: { background: "transparent", ...palette[theme] },
+		});
+		initializedTheme = theme;
 	}
-	diagrams.forEach(({ node, source }) => {
-		node.removeAttribute("data-processed");
-		node.replaceChildren(document.createTextNode(source));
-	});
-	mermaid.initialize({
-		startOnLoad: false,
-		theme: theme === "dark" ? "dark" : "default",
-		themeVariables: {
-			background: theme === "dark" ? "#000000" : "#ffffff",
-			primaryColor: theme === "dark" ? "#202020" : "#ffffff",
-			primaryTextColor: theme === "dark" ? "#ffffff" : "#000000",
-			lineColor: "#808080",
-		},
-	});
-	await mermaid.run({ nodes: diagrams.map(({ node }) => node) });
-	if (!current()) pending = true;
+	return instance;
 };
 
-const drain = async (): Promise<void> => {
-	do {
-		await render();
-	} while (pending && visible.length > 0);
+const themeOf = (): Theme => {
+	const htmlTheme = document.documentElement.dataset.theme;
+	if (htmlTheme === "dark") return "dark";
+	if (htmlTheme === "light") return "light";
+	const bodyTheme = document.body?.dataset.theme;
+	if (bodyTheme === "dark") return "dark";
+	if (bodyTheme === "light") return "light";
+	if (document.documentElement.classList.contains("dark")) return "dark";
+	return window.matchMedia("(prefers-color-scheme: dark)").matches
+		? "dark"
+		: "light";
 };
 
-const schedule = (): void => {
-	pending = true;
-	if (rendering) return;
-	rendering = drain().finally(() => {
-		rendering = undefined;
-		if (pending && visible.length > 0) schedule();
-	});
+const sourceOf = (diagram: HTMLPreElement): string => {
+	let source = diagram.dataset.diagram;
+	if (source === undefined) {
+		source = (diagram.textContent ?? "").replace(/\n$/, "");
+		diagram.dataset.diagram = source;
+	}
+	return source;
 };
 
-export const observeMermaid = (
-	theme: Theme,
-	root: ParentNode = document,
-): void => {
-	generation += 1;
-	const version = generation;
-	requestedTheme = theme;
-	visible = [];
-	pending = false;
-	stopObserving();
+const claim = (diagram: HTMLPreElement): boolean => {
+	if (
+		diagram.dataset.processed === "true" ||
+		diagram.dataset.rendering === "true"
+	) {
+		return false;
+	}
+	diagram.dataset.rendering = "true";
+	return true;
+};
+
+const fit = (diagram: HTMLPreElement, svg: SVGSVGElement): void => {
+	const width = diagram.dataset.width;
+	const height = diagram.dataset.height;
+	if (width) svg.style.width = `${width}px`;
+	if (height) svg.style.height = `${height}px`;
+};
+
+const fail = (diagram: HTMLPreElement, message: string): void => {
+	const box = document.createElement("div");
+	box.className = "mermaid-error";
+	const detail = document.createElement("p");
+	detail.textContent = `Error rendering diagram: ${message}`;
+	const source = document.createElement("pre");
+	source.textContent = sourceOf(diagram);
+	box.append(detail, source);
+	diagram.replaceChildren(box);
+};
+
+const renderOne = async (diagram: HTMLPreElement): Promise<void> => {
+	if (!claim(diagram)) return;
+	try {
+		const instance = await ready(themeOf());
+		const { svg, bindFunctions } = await instance.render(
+			crypto.randomUUID(),
+			sourceOf(diagram),
+		);
+		diagram.replaceChildren();
+		diagram.innerHTML = svg;
+		const svgElement = diagram.querySelector("svg");
+		if (svgElement) {
+			bindFunctions?.(svgElement);
+			fit(diagram, svgElement);
+		}
+		diagram.dataset.processed = "true";
+	} catch (error) {
+		console.error("[mermaid] render error:", error);
+		fail(diagram, error instanceof Error ? error.message : String(error));
+		diagram.dataset.processed = "true";
+	} finally {
+		delete diagram.dataset.rendering;
+	}
+};
+
+export const observeMermaid = (root: ParentNode = document): void => {
 	const diagrams = [
 		...root.querySelectorAll<HTMLPreElement>("pre.mermaid"),
-	].map((node) => ({ node, source: node.textContent ?? "" }));
+	].filter((diagram) => diagram.dataset.processed !== "true");
 	if (diagrams.length === 0) return;
 	if (!("IntersectionObserver" in window)) {
-		visible = diagrams;
-		schedule();
+		void Promise.all(diagrams.map(renderOne));
 		return;
 	}
-	const awaiting = new Map<Element, Diagram>(
-		diagrams.map((diagram) => [diagram.node, diagram]),
-	);
+	const pending = new Set(diagrams);
 	const observer = new IntersectionObserver(
 		(entries) => {
-			if (version !== generation) return;
-			const entered: Diagram[] = [];
 			for (const entry of entries) {
-				const diagram = awaiting.get(entry.target);
-				if (!entry.isIntersecting || !diagram) continue;
-				awaiting.delete(entry.target);
-				observer.unobserve(entry.target);
-				entered.push(diagram);
+				if (!entry.isIntersecting) continue;
+				const diagram = entry.target as HTMLPreElement;
+				if (!pending.has(diagram)) continue;
+				pending.delete(diagram);
+				observer.unobserve(diagram);
+				void renderOne(diagram);
 			}
-			if (entered.length === 0) return;
-			visible = [...visible, ...entered];
-			schedule();
-			if (awaiting.size === 0) stopObserving();
+			if (pending.size === 0) observer.disconnect();
 		},
-		{ rootMargin: margin },
+		{ rootMargin: "300px" },
 	);
-	stopObserving = () => {
-		observer.disconnect();
-		stopObserving = idle;
-	};
-	diagrams.forEach(({ node }) => {
-		observer.observe(node);
-	});
+	for (const diagram of diagrams) observer.observe(diagram);
 };
 
-export const renderMermaid = (theme: Theme): void => {
-	requestedTheme = theme;
-	if (visible.length > 0) schedule();
+export const observeTheme = (): void => {
+	if (themeObserver) return;
+	const refresh = (): void => {
+		const theme = themeOf();
+		if (theme === lastTheme) return;
+		lastTheme = theme;
+		for (const diagram of document.querySelectorAll<HTMLPreElement>(
+			"pre.mermaid[data-processed]",
+		)) {
+			diagram.removeAttribute("data-processed");
+		}
+		observeMermaid();
+	};
+	themeObserver = new MutationObserver(() => {
+		clearTimeout(themeDebounce);
+		themeDebounce = setTimeout(refresh, 50);
+	});
+	themeObserver.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ["data-theme", "class"],
+	});
+	if (document.body) {
+		themeObserver.observe(document.body, {
+			attributes: true,
+			attributeFilter: ["data-theme"],
+		});
+	}
 };

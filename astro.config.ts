@@ -90,5 +90,8 @@ export default defineConfig({
 		css: {
 			transformer: "lightningcss",
 		},
+		optimizeDeps: {
+			include: ["mermaid"],
+		},
 	},
 });
