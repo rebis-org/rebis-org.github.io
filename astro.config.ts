@@ -29,6 +29,7 @@ export default defineConfig({
 		clientPrerender: true,
 		chromeDevtoolsWorkspace: true,
 		collectionStorage: "chunked",
+		incrementalBuild: true,
 	},
 	build: {
 		inlineStylesheets: "always",

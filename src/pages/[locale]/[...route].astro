@@ -8,6 +8,7 @@ import { pageRoutes } from "../../site";
 type StaticPath = Readonly<{
 	readonly params: Readonly<{ locale: Locale; route?: string }>;
 	readonly props: RouteProps;
+	readonly cacheKey?: string | number;
 }>;
 
 export const getStaticPaths = async (): Promise<readonly StaticPath[]> => {
@@ -17,10 +18,17 @@ export const getStaticPaths = async (): Promise<readonly StaticPath[]> => {
 			props: { kind: "page", page, locale },
 		}));
 	const postPaths = async (locale: Locale): Promise<readonly StaticPath[]> =>
-		(await postEntries(locale)).map((entry) => ({
-			params: { locale, route: `blog/${postId(entry)}` },
-			props: { kind: "post", entry, locale },
-		}));
+		(await postEntries(locale)).map((entry) => {
+			const cacheKey = entry.digest;
+			if (cacheKey === undefined) {
+				throw new Error(`post ${postId(entry)} is missing a content digest`);
+			}
+			return {
+				params: { locale, route: `blog/${postId(entry)}` },
+				props: { kind: "post", entry, locale },
+				cacheKey,
+			};
+		});
 	return [
 		...locales.flatMap(pagePaths),
 		...(await Promise.all(locales.map(postPaths))).flat(),

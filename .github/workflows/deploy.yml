@@ -26,6 +26,12 @@ jobs:
           node-version-file: .node-version
           cache: true
       - run: nub ci
+      - uses: actions/cache@v6.1.0
+        with:
+          path: node_modules/.astro
+          key: astro-incremental-${{ runner.os }}-${{ hashFiles('astro.config.ts', 'nub.lock') }}
+          restore-keys: |
+            astro-incremental-${{ runner.os }}-
       - run: nub run build
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
