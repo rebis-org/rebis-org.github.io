@@ -10,7 +10,11 @@ const optionalText = text.optional();
 
 export const collections = {
 	posts: defineCollection({
-		loader: glob({ base: "./src/posts", pattern: "**/[^_]*.{md,mdx}" }),
+		loader: glob({
+			base: "./src/posts",
+			pattern: "**/[^_]*.{md,mdx}",
+			deferRender: true,
+		}),
 		schema: z
 			.object({
 				title: text,
