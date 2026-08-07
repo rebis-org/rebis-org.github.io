@@ -25,7 +25,11 @@ export default defineConfig({
 		routing: { prefixDefaultLocale: true },
 	},
 	prefetch: { prefetchAll: true, defaultStrategy: "hover" },
-	experimental: { clientPrerender: true, chromeDevtoolsWorkspace: true },
+	experimental: {
+		clientPrerender: true,
+		chromeDevtoolsWorkspace: true,
+		collectionStorage: "chunked",
+	},
 	build: {
 		inlineStylesheets: "always",
 	},
