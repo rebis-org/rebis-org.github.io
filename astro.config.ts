@@ -11,7 +11,7 @@ import { presetTypography } from "@unocss/preset-typography";
 import { presetWind3 } from "@unocss/preset-wind3";
 import { defineConfig, fontProviders } from "astro/config";
 import { locales } from "./src/i18n";
-import { diagrams, displayMath, mathematics } from "./src/markdown";
+import { diagrams, mathematics } from "./src/markdown";
 
 const base = `${(process.env.ASTRO_BASE ?? "").replace(/\/+$/, "")}/`;
 
@@ -37,7 +37,6 @@ export default defineConfig({
 	markdown: {
 		processor: satteri({
 			features: { math: true },
-			mdastPlugins: [displayMath],
 			hastPlugins: [diagrams, mathematics],
 		}),
 		syntaxHighlight: { type: "shiki", excludeLangs: ["mermaid", "math"] },

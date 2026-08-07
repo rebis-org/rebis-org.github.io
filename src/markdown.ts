@@ -1,24 +1,14 @@
 import katex from "katex";
 import {
 	defineHastPlugin,
-	defineMdastPlugin,
 	type HastNode,
 	type HastVisitorContext,
-	type MdastNode,
 } from "satteri";
 
-type MathNode = Extract<MdastNode, { type: "math" }>;
 type Element = Extract<HastNode, { type: "element" }>;
 
 const renderMath = (value: string, displayMode: boolean): string =>
 	katex.renderToString(value, { displayMode, throwOnError: false });
-
-export const displayMath = defineMdastPlugin({
-	name: "display-math",
-	math(node: Readonly<MathNode>) {
-		return { rawHtml: renderMath(node.value, true) };
-	},
-});
 
 export const mathematics = defineHastPlugin({
 	name: "mathematics",
