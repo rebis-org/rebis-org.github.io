@@ -19,6 +19,7 @@ const base = `${(process.env.ASTRO_BASE ?? "").replace(/\/+$/, "")}/`;
 export default defineConfig({
 	site: process.env.SITE_URL || "https://rebis-org.github.io",
 	base,
+	trailingSlash: "always",
 	output: "static",
 	i18n: {
 		locales: [...locales],
