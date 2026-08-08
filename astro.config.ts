@@ -8,7 +8,7 @@ import {
 } from "@shikijs/transformers";
 import unocss from "@unocss/astro";
 import { presetTypography } from "@unocss/preset-typography";
-import { presetWind3 } from "@unocss/preset-wind3";
+import { presetWind4 } from "@unocss/preset-wind4";
 import { defineConfig, fontProviders } from "astro/config";
 import { locales } from "./src/i18n";
 import { diagrams, mathematics } from "./src/markdown";
@@ -84,7 +84,12 @@ export default defineConfig({
 		sitemap({
 			filter: (page) => !/(?:^|\/)(?:404|500)\/?$/.test(page),
 		}),
-		unocss({ presets: [presetWind3(), presetTypography()] }),
+		unocss({
+			presets: [
+				presetWind4({ preflights: { reset: false } }),
+				presetTypography(),
+			],
+		}),
 	],
 	vite: {
 		css: {

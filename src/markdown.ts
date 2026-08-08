@@ -49,9 +49,8 @@ export const diagrams = defineHastPlugin({
 			) {
 				return;
 			}
-			const meta = (
-				code as Readonly<{ data?: Readonly<{ meta?: string }> }>
-			).data?.meta;
+			const meta = (code as Readonly<{ data?: Readonly<{ meta?: string }> }>)
+				.data?.meta;
 			const width = meta?.match(/\bw-(\d+)/)?.[1];
 			const height = meta?.match(/\bh-(\d+)/)?.[1];
 			const titleMatch = meta?.match(/\btitle=(?:"([^"]*)"|'([^']*)')/);
