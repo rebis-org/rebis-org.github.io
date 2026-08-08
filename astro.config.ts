@@ -17,7 +17,7 @@ import { diagrams, mathematics } from "./src/markdown";
 const base = `${(process.env.ASTRO_BASE ?? "").replace(/\/+$/, "")}/`;
 
 export default defineConfig({
-	site: process.env.SITE_URL || "https://rebis-org.github.io",
+	site: process.env.SITE_URL || "https://rebis.cn",
 	base,
 	trailingSlash: "always",
 	output: "static",
