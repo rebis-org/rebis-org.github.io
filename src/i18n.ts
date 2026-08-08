@@ -82,10 +82,17 @@ const zh = {
 } satisfies Dictionary;
 
 const catalog: Record<Locale, Dictionary> = { "en-us": en, "zh-cn": zh };
+const localeTags = new Map<Locale, string>();
 const dateFormats = new Map<Locale, Intl.DateTimeFormat>();
+const numberFormats = new Map<Locale, Intl.NumberFormat>();
 
-export const localeTag = (locale: Locale): string =>
-	new Intl.Locale(locale).baseName;
+export const localeTag = (locale: Locale): string => {
+	const cached = localeTags.get(locale);
+	if (cached) return cached;
+	const tag = new Intl.Locale(locale).baseName;
+	localeTags.set(locale, tag);
+	return tag;
+};
 
 export const translate = (locale: Locale, key: TranslationKey): string =>
 	catalog[locale][key];
@@ -98,4 +105,12 @@ export const formatDate = (locale: Locale, value: Date | string): string => {
 	});
 	dateFormats.set(locale, formatter);
 	return formatter.format(new Date(value));
+};
+
+export const formatNumber = (locale: Locale, value: number): string => {
+	const cached = numberFormats.get(locale);
+	if (cached) return cached.format(value);
+	const formatter = new Intl.NumberFormat(localeTag(locale));
+	numberFormats.set(locale, formatter);
+	return formatter.format(value);
 };

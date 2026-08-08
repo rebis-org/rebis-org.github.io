@@ -21,6 +21,7 @@
 		"@unocss/astro": "66.7.5",
 		"@unocss/preset-typography": "66.7.5",
 		"@unocss/preset-wind4": "66.7.5",
+		"@unocss/transformer-variant-group": "66.7.5",
 		"astro": "7.2.0",
 		"katex": "^0.18.1",
 		"lucide": "^1.29.0",
@@ -47,5 +48,8 @@
 		"esbuild": true,
 		"lightningcss": true,
 		"core-js": true
+	},
+	"patchedDependencies": {
+		"@astrojs/markdown-satteri@0.3.5": "patches/@astrojs+markdown-satteri@0.3.5.patch"
 	}
 }

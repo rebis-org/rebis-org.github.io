@@ -10,6 +10,7 @@ import {
 import type { IconInput } from "morphicons";
 import {
 	formatDate,
+	formatNumber,
 	type Locale,
 	type TranslationKey,
 	translate,
@@ -224,22 +225,22 @@ export const projectDetails = (
 	},
 	{
 		label: translate(locale, "project.forks"),
-		value: project.forks,
+		value: formatNumber(locale, project.forks),
 		icon: GitFork,
 	},
 	{
 		label: translate(locale, "project.stars"),
-		value: project.stars,
+		value: formatNumber(locale, project.stars),
 		icon: Star,
 	},
 	{
 		label: translate(locale, "project.issues"),
-		value: project.issues,
+		value: formatNumber(locale, project.issues),
 		icon: CircleDot,
 	},
 	{
 		label: translate(locale, "project.pullRequests"),
-		value: project.pullRequests,
+		value: formatNumber(locale, project.pullRequests),
 		icon: GitPullRequestArrow,
 	},
 	{

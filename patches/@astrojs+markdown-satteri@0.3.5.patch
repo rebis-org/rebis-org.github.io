@@ -1,0 +1,16 @@
+diff --git a/dist/satteri-processor.js b/dist/satteri-processor.js
+--- a/dist/satteri-processor.js
++++ b/dist/satteri-processor.js
+@@ -133,7 +133,11 @@
+         if (!codeChild || codeChild.type !== "element") return;
+         const lang = codeChild.data?.lang ?? "plaintext";
+         const meta = codeChild.data?.meta ?? void 0;
+-        if (excludeLangs && excludeLangs.includes(lang) || defaultExcludeLanguages.includes(lang)) {
++        const className = codeChild.properties?.className;
++        const isMath = Array.isArray(className) && className.some(
++          (c) => c === "language-math" || c.startsWith("math-")
++        );
++        if (isMath || (excludeLangs && excludeLangs.includes(lang)) || defaultExcludeLanguages.includes(lang)) {
+           return;
+         }
+         const code = ctx.textContent(codeChild).replace(/\n$/, "");

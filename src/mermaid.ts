@@ -1,190 +1,235 @@
-import type { Theme } from "./theme";
-
 type MermaidModule = typeof import("mermaid");
 type Mermaid = MermaidModule["default"];
+type RGB = readonly [number, number, number];
 
-const diagramColors = ({
-	ink,
-	paper,
-	muted,
-}: Readonly<{ ink: string; paper: string; muted: string }>) =>
-	({
-		lineColor: muted,
-		textColor: ink,
-		arrowheadColor: muted,
-		primaryTextColor: ink,
-		titleColor: ink,
-		primaryColor: paper,
-		primaryBorderColor: muted,
-		mainBkg: paper,
-		nodeBkg: paper,
-		nodeBorder: muted,
-		clusterBkg: paper,
-		clusterBorder: muted,
-		edgeLabelBackground: paper,
-		actorBorder: muted,
-		actorBkg: paper,
-		actorLineColor: muted,
-		signalColor: ink,
-	}) as const;
-
-const palette = {
-	light: diagramColors({ ink: "#000000", paper: "#ffffff", muted: "#808080" }),
-	dark: diagramColors({ ink: "#ffffff", paper: "#000000", muted: "#808080" }),
-} as const;
-
-let mermaid: Mermaid | undefined;
-let initializedTheme: Theme | undefined;
-let lastTheme: Theme | undefined;
-let themeDebounce: ReturnType<typeof setTimeout> | undefined;
-let themeObserver: MutationObserver | undefined;
-
-const loadMermaid = async (): Promise<Mermaid> => {
-	if (!mermaid) mermaid = (await import("mermaid")).default;
-	return mermaid;
+const theme = (): readonly [RGB, RGB, RGB] => {
+	const probe = document.body.appendChild(document.createElement("div"));
+	probe.style.position = "fixed";
+	probe.style.left = "-9999px";
+	const read = (name: string): RGB => {
+		probe.style.color = `var(${name})`;
+		const [r = 0, g = 0, b = 0] =
+			getComputedStyle(probe).color.match(/\d+/g)?.map(Number) ?? [];
+		return [r, g, b];
+	};
+	const colors = [
+		read("--ink"),
+		read("--muted"),
+		read("--background"),
+	] as const;
+	probe.remove();
+	return colors;
 };
 
-const ready = async (theme: Theme): Promise<Mermaid> => {
-	const instance = await loadMermaid();
-	if (initializedTheme !== theme) {
+const hex = ([r, g, b]: RGB): string =>
+	`#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+
+const shade = ([fr, fg, fb]: RGB, [tr, tg, tb]: RGB, weight: number): RGB => [
+	Math.round(fr * weight + tr * (1 - weight)),
+	Math.round(fg * weight + tg * (1 - weight)),
+	Math.round(fb * weight + tb * (1 - weight)),
+];
+
+const FONT = "var(--font-noto-sans), var(--font-noto-sans-sc), sans-serif";
+
+const palette = ([ink, muted, bg]: readonly [RGB, RGB, RGB]): Record<
+	string,
+	string
+> => {
+	const h = (c: RGB): string => hex(c);
+	const m = h(muted);
+	const i = h(ink);
+	const b = h(bg);
+	const bgMix = (w: number): string => h(shade(muted, bg, w));
+	const inkMix = (w: number): string => h(shade(muted, ink, w));
+	const pie = [
+		bgMix(0.75),
+		bgMix(0.55),
+		bgMix(0.35),
+		m,
+		inkMix(0.8),
+		inkMix(0.65),
+		inkMix(0.4),
+		i,
+	];
+	const git = [
+		m,
+		inkMix(0.5),
+		bgMix(0.7),
+		inkMix(0.6),
+		bgMix(0.4),
+		bgMix(0.5),
+		inkMix(0.7),
+		inkMix(0.85),
+	];
+	return {
+		lineColor: m,
+		textColor: i,
+		titleColor: i,
+		primaryColor: b,
+		primaryTextColor: i,
+		primaryBorderColor: m,
+		secondaryColor: bgMix(0.1),
+		tertiaryColor: bgMix(0.2),
+		mainBkg: b,
+		nodeBkg: b,
+		nodeBorder: m,
+		clusterBkg: bgMix(0.08),
+		clusterBorder: m,
+		edgeLabelBackground: b,
+		edgeLabelColor: i,
+		fontFamily: FONT,
+		fontSize: "14px",
+		actorBkg: b,
+		actorBorder: m,
+		actorTextColor: i,
+		actorLineColor: m,
+		signalColor: i,
+		signalTextColor: i,
+		labelBoxBkgColor: b,
+		labelBoxBorderColor: m,
+		labelTextColor: i,
+		noteBkgColor: bgMix(0.08),
+		noteBorderColor: m,
+		noteTextColor: i,
+		activationBkgColor: bgMix(0.08),
+		activationBorderColor: m,
+		sequenceNumberColor: i,
+		classText: i,
+		attributeBackgroundColorOdd: b,
+		attributeBackgroundColorEven: bgMix(0.08),
+		sectionBkgColor: bgMix(0.08),
+		sectionBkgColor2: bgMix(0.16),
+		taskBkgColor: b,
+		taskBorderColor: m,
+		taskTextColor: i,
+		gridColor: bgMix(0.18),
+		todayLineColor: m,
+		...Object.fromEntries(pie.map((v, k) => [`pie${k + 1}`, v])),
+		...Object.fromEntries(git.map((v, k) => [`git${k}`, v])),
+		commitLabelColor: i,
+		commitLabelBackground: b,
+		tagLabelColor: i,
+		tagLabelBackground: b,
+		tagLabelBorder: m,
+		tagLabelFontSize: "12px",
+	};
+};
+
+let instance: Mermaid | undefined;
+let currentKey = "";
+
+const ready = async (): Promise<Mermaid> => {
+	instance ??= (await import("mermaid")).default;
+	const colors = theme();
+	const key = colors.map(hex).join(",");
+	if (key !== currentKey) {
 		instance.initialize({
 			startOnLoad: false,
-			theme: theme === "dark" ? "dark" : "default",
-			themeVariables: { background: "transparent", ...palette[theme] },
+			theme:
+				document.documentElement.dataset.theme === "dark" ? "dark" : "default",
+			themeVariables: { background: "transparent", ...palette(colors) },
+			gitGraph: {
+				mainBranchName: "main",
+				showCommitLabel: true,
+				showBranches: true,
+				rotateCommitLabel: true,
+			},
 		});
-		initializedTheme = theme;
+		currentKey = key;
 	}
 	return instance;
 };
 
-const themeOf = (): Theme => {
-	const htmlTheme = document.documentElement.dataset.theme;
-	if (htmlTheme === "dark") return "dark";
-	if (htmlTheme === "light") return "light";
-	const bodyTheme = document.body?.dataset.theme;
-	if (bodyTheme === "dark") return "dark";
-	if (bodyTheme === "light") return "light";
-	if (document.documentElement.classList.contains("dark")) return "dark";
-	return window.matchMedia("(prefers-color-scheme: dark)").matches
-		? "dark"
-		: "light";
-};
+const source = (pre: HTMLPreElement): string =>
+	(pre.dataset.diagram ??= (pre.textContent ?? "").replace(/\n$/, ""));
 
-const sourceOf = (diagram: HTMLPreElement): string => {
-	let source = diagram.dataset.diagram;
-	if (source === undefined) {
-		source = (diagram.textContent ?? "").replace(/\n$/, "");
-		diagram.dataset.diagram = source;
-	}
-	return source;
-};
-
-const claim = (diagram: HTMLPreElement): boolean => {
-	if (
-		diagram.dataset.processed === "true" ||
-		diagram.dataset.rendering === "true"
-	) {
-		return false;
-	}
-	diagram.dataset.rendering = "true";
-	return true;
-};
-
-const fit = (diagram: HTMLPreElement, svg: SVGSVGElement): void => {
-	const width = diagram.dataset.width;
-	const height = diagram.dataset.height;
-	if (width) svg.style.width = `${width}px`;
-	if (height) svg.style.height = `${height}px`;
-};
-
-const fail = (diagram: HTMLPreElement, message: string): void => {
+const fail = (pre: HTMLPreElement, message: string): void => {
 	const box = document.createElement("div");
 	box.className = "mermaid-error";
 	const detail = document.createElement("p");
 	detail.textContent = `Error rendering diagram: ${message}`;
-	const source = document.createElement("pre");
-	source.textContent = sourceOf(diagram);
-	box.append(detail, source);
-	diagram.replaceChildren(box);
+	const src = document.createElement("pre");
+	src.textContent = source(pre);
+	box.append(detail, src);
+	pre.replaceChildren(box);
 };
 
-const renderOne = async (diagram: HTMLPreElement): Promise<void> => {
-	if (!claim(diagram)) return;
+const render = async (pre: HTMLPreElement, force = false): Promise<void> => {
+	if (pre.dataset.rendering === "true") return;
+	if (!force && pre.dataset.processed === "true") return;
+	pre.dataset.rendering = "true";
 	try {
-		const instance = await ready(themeOf());
-		const { svg, bindFunctions } = await instance.render(
+		const { svg, bindFunctions } = await (await ready()).render(
 			crypto.randomUUID(),
-			sourceOf(diagram),
+			source(pre),
 		);
-		diagram.replaceChildren();
-		diagram.innerHTML = svg;
-		const svgElement = diagram.querySelector("svg");
-		if (svgElement) {
-			bindFunctions?.(svgElement);
-			fit(diagram, svgElement);
+		pre.replaceChildren();
+		pre.innerHTML = svg;
+		const svgEl = pre.querySelector("svg");
+		if (svgEl) {
+			bindFunctions?.(svgEl);
+			const width = pre.dataset.width;
+			const height = pre.dataset.height;
+			if (width) svgEl.style.width = `${width}px`;
+			if (height) svgEl.style.height = `${height}px`;
 		}
-		diagram.dataset.processed = "true";
+		pre.dataset.processed = "true";
 	} catch (error) {
 		console.error("[mermaid] render error:", error);
-		fail(diagram, error instanceof Error ? error.message : String(error));
-		diagram.dataset.processed = "true";
+		fail(pre, error instanceof Error ? error.message : String(error));
+		pre.dataset.processed = "true";
 	} finally {
-		delete diagram.dataset.rendering;
+		delete pre.dataset.rendering;
 	}
 };
 
 export const observeMermaid = (root: ParentNode = document): void => {
-	const diagrams = [
-		...root.querySelectorAll<HTMLPreElement>("pre.mermaid"),
-	].filter((diagram) => diagram.dataset.processed !== "true");
-	if (diagrams.length === 0) return;
+	const pres = [...root.querySelectorAll<HTMLPreElement>("pre.mermaid")].filter(
+		(pre) => pre.dataset.processed !== "true",
+	);
+	if (!pres.length) return;
 	if (!("IntersectionObserver" in window)) {
-		void Promise.all(diagrams.map(renderOne));
+		void Promise.all(pres.map((pre) => render(pre)));
 		return;
 	}
-	const pending = new Set(diagrams);
-	const observer = new IntersectionObserver(
+	const pending = new Set(pres);
+	const io = new IntersectionObserver(
 		(entries) => {
 			for (const entry of entries) {
-				if (!entry.isIntersecting) continue;
-				const diagram = entry.target as HTMLPreElement;
-				if (!pending.has(diagram)) continue;
-				pending.delete(diagram);
-				observer.unobserve(diagram);
-				void renderOne(diagram);
+				const pre = entry.target as HTMLPreElement;
+				if (!entry.isIntersecting || !pending.delete(pre)) continue;
+				io.unobserve(pre);
+				void render(pre);
 			}
-			if (pending.size === 0) observer.disconnect();
+			if (!pending.size) io.disconnect();
 		},
 		{ rootMargin: "300px" },
 	);
-	for (const diagram of diagrams) observer.observe(diagram);
+	for (const pre of pres) io.observe(pre);
+};
+
+let observer: MutationObserver | undefined;
+let timer: ReturnType<typeof setTimeout> | undefined;
+
+const refresh = (): void => {
+	if (theme().map(hex).join(",") === currentKey) return;
+	for (const pre of document.querySelectorAll<HTMLPreElement>(
+		"pre.mermaid[data-processed]",
+	)) {
+		void render(pre, true);
+	}
+	observeMermaid();
 };
 
 export const observeTheme = (): void => {
-	if (themeObserver) return;
-	const refresh = (): void => {
-		const theme = themeOf();
-		if (theme === lastTheme) return;
-		lastTheme = theme;
-		for (const diagram of document.querySelectorAll<HTMLPreElement>(
-			"pre.mermaid[data-processed]",
-		)) {
-			diagram.removeAttribute("data-processed");
-		}
-		observeMermaid();
-	};
-	themeObserver = new MutationObserver(() => {
-		clearTimeout(themeDebounce);
-		themeDebounce = setTimeout(refresh, 50);
+	if (observer) return;
+	observer = new MutationObserver(() => {
+		clearTimeout(timer);
+		timer = setTimeout(refresh, 50);
 	});
-	themeObserver.observe(document.documentElement, {
+	observer.observe(document.documentElement, {
 		attributes: true,
-		attributeFilter: ["data-theme", "class"],
+		attributeFilter: ["data-theme"],
 	});
-	if (document.body) {
-		themeObserver.observe(document.body, {
-			attributes: true,
-			attributeFilter: ["data-theme"],
-		});
-	}
 };

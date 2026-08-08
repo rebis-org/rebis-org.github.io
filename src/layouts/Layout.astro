@@ -109,7 +109,7 @@ const navigationClass =
           />
         </a>
         <nav class="site-navigation w-full sm:w-auto">
-          <ul class="grid grid-cols-3 items-center gap-1 sm:flex sm:gap-4">
+          <ul class="grid grid-cols-3 items-center gap-1 sm:(flex gap-4)">
             {links.map(({ title, link }) => (
               <li>
                 <a
@@ -157,9 +157,9 @@ const navigationClass =
     <main id="main-content" tabindex="-1" class="mb-24">
       <slot />
     </main>
-    <footer class="border-secondary mt-16 border-t py-8">
+    <footer class="mt-16 py-8">
       <div
-        class="mx-auto flex max-w-2xl flex-col gap-4 px-6 sm:flex-row sm:items-center sm:justify-between"
+        class="mx-auto flex max-w-2xl flex-col gap-4 px-6 sm:(flex-row items-center justify-between)"
       >
         <p class="text-secondary text-sm font-medium">
           © {new Date().getFullYear()} {organization?.name ?? "N/A"}

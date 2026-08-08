@@ -9,6 +9,7 @@ import {
 import unocss from "@unocss/astro";
 import { presetTypography } from "@unocss/preset-typography";
 import { presetWind4 } from "@unocss/preset-wind4";
+import transformerVariantGroup from "@unocss/transformer-variant-group";
 import { defineConfig, fontProviders } from "astro/config";
 import { locales } from "./src/i18n";
 import { diagrams, mathematics } from "./src/markdown";
@@ -86,9 +87,10 @@ export default defineConfig({
 		}),
 		unocss({
 			presets: [
-				presetWind4({ preflights: { reset: false } }),
+				presetWind4({ preflights: { reset: true } }),
 				presetTypography(),
 			],
+			transformers: [transformerVariantGroup()],
 		}),
 	],
 	vite: {
