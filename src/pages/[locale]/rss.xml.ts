@@ -15,7 +15,7 @@ export const GET: APIRoute<Record<string, never>, { locale: Locale }> = async ({
 	site: siteUrl,
 }) => {
 	const { locale } = params;
-	const origin = siteUrl ?? new URL("https://rebis-org.github.io");
+	const origin = siteUrl ?? new URL("https://rebis.cn");
 	const entries = await sortedPostEntries(locale);
 	return rss({
 		title: `${site.name} Blog`,

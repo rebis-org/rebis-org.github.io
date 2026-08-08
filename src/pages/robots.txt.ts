@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { absolute, path } from "../link";
 
 export const GET: APIRoute = ({ site }) => {
-	const origin = site ?? new URL("https://rebis-org.github.io");
+	const origin = site ?? new URL("https://rebis.cn");
 	const body = [
 		"User-agent: *",
 		"Allow: /",
