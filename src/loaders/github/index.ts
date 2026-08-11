@@ -1,6 +1,6 @@
 import { env } from "node:process";
 import type { Loader } from "astro/loaders";
-import { z } from "astro/zod";
+import * as v from "valibot";
 import type { Member, Organization, Project } from "../../site";
 import { graphql } from "./graphql";
 import { rest } from "./rest";
@@ -24,56 +24,57 @@ const query = `query Organization($after: String) {
   }
 }`;
 
-const text = z.string().trim().min(1);
-const count = z.number().int().nonnegative();
-const memberIdentitySchema = z.object({ login: text });
-const publicMembersSchema = z.array(memberIdentitySchema);
-const memberSchema = memberIdentitySchema.extend({
-	name: z.string().nullish(),
-	avatarUrl: z.url(),
-	url: z.url(),
+const text = v.pipe(v.string(), v.trim(), v.minLength(1));
+const count = v.pipe(v.number(), v.integer(), v.minValue(0));
+const memberIdentitySchema = v.object({ login: text });
+const publicMembersSchema = v.array(memberIdentitySchema);
+const memberSchema = v.object({
+	login: text,
+	name: v.nullish(v.string()),
+	avatarUrl: v.pipe(v.string(), v.url()),
+	url: v.pipe(v.string(), v.url()),
 });
-const repositorySchema = z.object({
+const repositorySchema = v.object({
 	name: text,
-	description: z.string().nullish(),
-	url: z.url(),
-	updatedAt: z.iso.datetime(),
+	description: v.nullish(v.string()),
+	url: v.pipe(v.string(), v.url()),
+	updatedAt: v.pipe(v.string(), v.isoTimestamp()),
 	forkCount: count,
 	stargazerCount: count,
-	primaryLanguage: z.object({ name: text }).nullish(),
-	licenseInfo: z.object({ spdxId: text }).nullish(),
-	issues: z.object({ totalCount: count }),
-	pullRequests: z.object({ totalCount: count }),
+	primaryLanguage: v.nullish(v.object({ name: text })),
+	licenseInfo: v.nullish(v.object({ spdxId: text })),
+	issues: v.object({ totalCount: count }),
+	pullRequests: v.object({ totalCount: count }),
 });
-const pageSchema = z.object({
-	data: z.object({
-		organization: z.object({
+const pageSchema = v.object({
+	data: v.object({
+		organization: v.object({
 			name: text,
-			email: z.email().nullish(),
-			membersWithRole: z.object({ nodes: z.array(memberSchema) }),
-			repositories: z.object({
-				nodes: z.array(repositorySchema),
-				pageInfo: z.object({
-					hasNextPage: z.boolean(),
-					endCursor: z.string().nullish(),
+			email: v.nullish(v.pipe(v.string(), v.email())),
+			membersWithRole: v.object({ nodes: v.array(memberSchema) }),
+			repositories: v.object({
+				nodes: v.array(repositorySchema),
+				pageInfo: v.object({
+					hasNextPage: v.boolean(),
+					endCursor: v.nullish(v.string()),
 				}),
 			}),
 		}),
 	}),
 });
 
-type Page = z.infer<typeof pageSchema>;
+type Page = v.InferOutput<typeof pageSchema>;
 type RawOrganization = Page["data"]["organization"];
-type RawRepository = z.infer<typeof repositorySchema>;
-type RawMember = z.infer<typeof memberSchema>;
+type RawRepository = v.InferOutput<typeof repositorySchema>;
+type RawMember = v.InferOutput<typeof memberSchema>;
 type GithubData = Organization | Project | Member;
 
-const parse = <Schema extends z.ZodType>(
+const parse = <Schema extends v.GenericSchema>(
 	schema: Schema,
 	value: unknown,
-): z.infer<Schema> | undefined => {
-	const result = schema.safeParse(value);
-	return result.success ? result.data : undefined;
+): v.InferOutput<Schema> | undefined => {
+	const result = v.safeParse(schema, value);
+	return result.success ? result.output : undefined;
 };
 
 const organizationData = ({ name, email }: RawOrganization): Organization => ({
