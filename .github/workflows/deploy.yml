@@ -24,7 +24,8 @@ jobs:
       - uses: nubjs/setup-nub@v0
         with:
           node-version-file: .node-version
-          cache: true
+          cache: false
+          # nubjs/nub#804
       - run: nub ci
       - uses: actions/cache@v6.1.0
         with:
