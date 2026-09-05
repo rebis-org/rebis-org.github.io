@@ -19,7 +19,7 @@
 		"@astrojs/sitemap": "^3.7.3",
 		"@shikijs/transformers": "^4.4.2",
 		"@unocss/astro": "66.8.0",
-		"@unocss/preset-typography": "66.8.0",
+		"@unocss/preset-typography": "66.9.2",
 		"@unocss/preset-wind4": "66.8.0",
 		"@unocss/transformer-variant-group": "66.8.0",
 		"astro": "7.2.4",
