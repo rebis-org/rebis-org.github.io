@@ -18,22 +18,22 @@
 		"@astrojs/rss": "^4.0.19",
 		"@astrojs/sitemap": "^3.7.3",
 		"@shikijs/transformers": "^4.4.2",
-		"@unocss/astro": "66.7.5",
-		"@unocss/preset-typography": "66.7.5",
-		"@unocss/preset-wind4": "66.7.5",
-		"@unocss/transformer-variant-group": "66.7.5",
-		"astro": "7.2.0",
+		"@unocss/astro": "66.8.0",
+		"@unocss/preset-typography": "66.8.0",
+		"@unocss/preset-wind4": "66.8.0",
+		"@unocss/transformer-variant-group": "66.8.0",
+		"astro": "7.2.4",
 		"katex": "^0.18.1",
 		"lucide": "^1.29.0",
 		"mermaid": "^11.16.1",
-		"morphicons": "^1.4.2",
+		"morphicons": "^1.7.1",
 		"pangu": "9.1.0",
 		"satteri": "^0.9.5",
 		"valibot": "^1.4.2"
 	},
 	"devDependencies": {
 		"@astrojs/check": "0.9.10",
-		"@biomejs/biome": "2.5.7",
+		"@biomejs/biome": "2.5.9",
 		"@types/node": "^26.1.2",
 		"lightningcss": "^1.33.0",
 		"typescript": "6.0.3",
@@ -42,7 +42,7 @@
 	"devEngines": {
 		"packageManager": {
 			"name": "nub",
-			"version": "^0.6.0",
+			"version": "^0.8.3",
 			"onFail": "warn"
 		}
 	},

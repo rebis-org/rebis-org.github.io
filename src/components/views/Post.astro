@@ -5,6 +5,7 @@ import { article } from "../../content";
 import { type Locale, translate } from "../../i18n";
 import Layout from "../../layouts/Layout.astro";
 import { site } from "../../site";
+import katexStylesheet from "katex/dist/katex.min.css?url";
 import Page from "../Page.astro";
 import TOC from "../TOC.astro";
 
@@ -25,6 +26,7 @@ const post = article(entry, locale);
     image: site.logo.light,
   }}
   {locale}
+  stylesheets={[katexStylesheet]}
 >
   <Page>
     <div class="relative">

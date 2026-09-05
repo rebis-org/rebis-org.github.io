@@ -14,15 +14,15 @@ import {
 	route as currentRoute,
 } from "../link";
 import { navigation, type Seo, site } from "../site";
-import "katex/dist/katex.min.css";
 import "../styles/global.css";
 
 interface Props {
 	readonly seo: Seo;
 	readonly locale: Locale;
+	readonly stylesheets?: readonly string[];
 }
 
-const { seo, locale } = Astro.props;
+const { seo, locale, stylesheets = [] } = Astro.props;
 const organization = await githubOrganization();
 const links = navigation(locale);
 const localRoute = currentRoute(Astro.url);
@@ -80,6 +80,7 @@ const navigationClass =
     <Font cssVariable="--font-noto-sans" preload />
     <Font cssVariable="--font-noto-sans-sc" />
     <Font cssVariable="--font-maple-mono" />
+    {stylesheets.map((stylesheet) => <link rel="stylesheet" href={stylesheet} />)}
   </head>
   <body>
     <a class="skip-link" href="#main-content">
@@ -96,6 +97,8 @@ const navigationClass =
             width={721}
             height={1479}
             loading="eager"
+            fetchpriority="high"
+            decoding="async"
             class="site-logo site-logo-light h-[52px] w-auto object-contain"
           />
           <Image
@@ -104,7 +107,8 @@ const navigationClass =
             aria-hidden="true"
             width={721}
             height={1479}
-            loading="eager"
+            loading="lazy"
+            decoding="async"
             class="site-logo site-logo-dark h-[52px] w-auto object-contain"
           />
         </a>
