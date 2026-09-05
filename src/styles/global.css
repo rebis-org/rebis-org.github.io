@@ -28,10 +28,56 @@
 	--social-icon-size: 2.5rem;
 	--motion-fast: 150ms;
 	--motion-ease: ease-out;
+	--muted-a08: oklch(from var(--muted) l c h / 0.08);
+	--muted-a12: oklch(from var(--muted) l c h / 0.12);
+	--muted-a16: oklch(from var(--muted) l c h / 0.16);
+	--muted-a20: oklch(from var(--muted) l c h / 0.2);
+	--muted-a45: oklch(from var(--muted) l c h / 0.45);
+	--diff-add: oklch(from #00ff00 l c h / 0.18);
+	--diff-remove: oklch(from #ff0000 l c h / 0.18);
+	--shimmer: linear-gradient(
+		90deg,
+		var(--muted-a08) 25%,
+		var(--muted-a16) 50%,
+		var(--muted-a08) 75%
+	);
 	color-scheme: light;
 }
 html[data-theme="dark"] {
 	color-scheme: dark;
+}
+@supports (color: color(display-p3 0 0 0)) {
+	:root {
+		--muted-a08: color(from var(--muted) display-p3 r g b / 0.08);
+		--muted-a12: color(from var(--muted) display-p3 r g b / 0.12);
+		--muted-a16: color(from var(--muted) display-p3 r g b / 0.16);
+		--muted-a20: color(from var(--muted) display-p3 r g b / 0.2);
+		--muted-a45: color(from var(--muted) display-p3 r g b / 0.45);
+		--diff-add: color(display-p3 0 1 0 / 0.18);
+		--diff-remove: color(display-p3 1 0 0 / 0.18);
+	}
+}
+@supports (color: color(rec2020 0 0 0)) {
+	:root {
+		--muted-a08: color(from var(--muted) rec2020 r g b / 0.08);
+		--muted-a12: color(from var(--muted) rec2020 r g b / 0.12);
+		--muted-a16: color(from var(--muted) rec2020 r g b / 0.16);
+		--muted-a20: color(from var(--muted) rec2020 r g b / 0.2);
+		--muted-a45: color(from var(--muted) rec2020 r g b / 0.45);
+		--diff-add: color(rec2020 0 1 0 / 0.18);
+		--diff-remove: color(rec2020 1 0 0 / 0.18);
+	}
+}
+@supports not (color: oklch(from black l c h)) {
+	:root {
+		--muted-a08: color-mix(in srgb, var(--muted) 8%, transparent);
+		--muted-a12: color-mix(in srgb, var(--muted) 12%, transparent);
+		--muted-a16: color-mix(in srgb, var(--muted) 16%, transparent);
+		--muted-a20: color-mix(in srgb, var(--muted) 20%, transparent);
+		--muted-a45: color-mix(in srgb, var(--muted) 45%, transparent);
+		--diff-add: color-mix(in srgb, #00ff00 18%, transparent);
+		--diff-remove: color-mix(in srgb, #ff0000 18%, transparent);
+	}
 }
 
 html {
@@ -219,7 +265,7 @@ html[data-theme="dark"] .site-logo-dark {
 	color: light-dark(var(--shiki-light), var(--shiki-dark)) !important;
 }
 .astro-code .highlighted {
-	background: color-mix(in srgb, var(--muted) 20%, transparent);
+	background: var(--muted-a20);
 	display: inline-block;
 	min-inline-size: 100%;
 }
@@ -228,10 +274,10 @@ html[data-theme="dark"] .site-logo-dark {
 	border-radius: 2px;
 }
 .astro-code .diff.add {
-	background: color-mix(in srgb, #00ff00 18%, transparent);
+	background: var(--diff-add);
 }
 .astro-code .diff.remove {
-	background: color-mix(in srgb, #ff0000 18%, transparent);
+	background: var(--diff-remove);
 }
 
 .prose {
@@ -242,16 +288,8 @@ html[data-theme="dark"] .site-logo-dark {
 	--un-prose-links: var(--muted) !important;
 	--un-prose-quotes: var(--muted) !important;
 	--un-prose-quote-borders: var(--muted) !important;
-	--un-prose-th-borders: color-mix(
-		in srgb,
-		var(--muted) 45%,
-		transparent
-	) !important;
-	--un-prose-td-borders: color-mix(
-		in srgb,
-		var(--muted) 45%,
-		transparent
-	) !important;
+	--un-prose-th-borders: var(--muted-a45) !important;
+	--un-prose-td-borders: var(--muted-a45) !important;
 	content-visibility: auto;
 	contain-intrinsic-size: auto 1000px;
 }
@@ -295,12 +333,7 @@ pre.mermaid:not([data-processed])::before {
 	position: absolute;
 	inset: 0;
 	visibility: visible;
-	background: linear-gradient(
-		90deg,
-		color-mix(in srgb, var(--muted) 8%, transparent) 25%,
-		color-mix(in srgb, var(--muted) 16%, transparent) 50%,
-		color-mix(in srgb, var(--muted) 8%, transparent) 75%
-	);
+	background: var(--shimmer);
 	background-size: 200% 100%;
 	animation: mermaid-shimmer 1.5s ease-in-out infinite;
 }
@@ -357,7 +390,7 @@ figure.mermaid-figure > figcaption {
 .mermaid-error pre {
 	margin: var(--space-2) 0 0;
 	padding: var(--space-2);
-	background: color-mix(in srgb, var(--muted) 12%, transparent);
+	background: var(--muted-a12);
 	border-radius: 0.25rem;
 	overflow-x: auto;
 	font-size: var(--text-sm);
