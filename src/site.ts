@@ -12,8 +12,8 @@ import {
 	formatDate,
 	formatNumber,
 	type Locale,
-	type TranslationKey,
 	translate,
+	type TranslationKey,
 } from "./i18n";
 import { external, type Link, localized, mail } from "./link";
 
@@ -87,6 +87,7 @@ type NameEntry = Readonly<{ term: string; quotes: readonly Quote[] }>;
 const profileUrl = "https://github.com/rebis-org";
 const codebergUrl = "https://codeberg.org/rebis-org";
 const cnbUrl = "https://cnb.cool/rebis-org";
+const liberapayUrl = "https://liberapay.com/rebis-org/donate";
 const lkmlUrl = "https://lkml.org/lkml/2000/8/25/132";
 const tagline = "日月不失其體，故蔽而復明；江漢不失其源，故窮而復通。";
 const logo = { light: "/logo/lignt.webp", dark: "/logo/dark.webp" };
@@ -179,6 +180,35 @@ export const social = (email: string | null | undefined): readonly Social[] => [
 	{ title: "Mail", ...(email ? { link: mail(email) } : {}), icon: Mail },
 ];
 
+export const support = (
+	locale: Locale,
+	email: string | null | undefined,
+): readonly Citation[] => {
+	const contact: CitationPart = email
+		? {
+				kind: "link",
+				label: translate(locale, "donate.sponsor.link"),
+				href: mail(email),
+			}
+		: { kind: "text", value: translate(locale, "donate.sponsor.link") };
+	return [
+		[
+			{ kind: "text", value: translate(locale, "donate.sponsor.before") },
+			contact,
+			{ kind: "text", value: translate(locale, "donate.sponsor.after") },
+		],
+		[
+			{ kind: "text", value: translate(locale, "donate.donate.before") },
+			{
+				kind: "link",
+				label: translate(locale, "donate.donate.link"),
+				href: external(liberapayUrl),
+			},
+			{ kind: "text", value: translate(locale, "donate.donate.after") },
+		],
+	];
+};
+
 export const header = (locale: Locale, page: HeaderPage): Header => {
 	const citation: readonly CitationPart[] =
 		page === "about"
@@ -245,6 +275,9 @@ export const projectDetails = (
 	},
 	{
 		label: translate(locale, "project.updated"),
-		value: `${translate(locale, "project.updated")} ${formatDate(locale, project.updatedAt)}`,
+		value: `${translate(locale, "project.updated")} ${formatDate(
+			locale,
+			project.updatedAt,
+		)}`,
 	},
 ];

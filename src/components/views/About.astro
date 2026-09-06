@@ -3,7 +3,7 @@ import { githubMembers, githubOrganization } from "../../content";
 import { type Locale, translate } from "../../i18n";
 import Layout from "../../layouts/Layout.astro";
 import { external } from "../../link";
-import { header, pages, social } from "../../site";
+import { header, pages, social, support } from "../../site";
 import Citation from "../Citation.astro";
 import Item from "../Item.astro";
 import Page from "../Page.astro";
@@ -58,6 +58,16 @@ const [organization, members] = await Promise.all([
         {
           social(organization?.email).map(({ title, link, icon }) => (
             <Item variant="social-box" link={link} title={title} icon={icon} />
+          ))
+        }
+      </div>
+    </Section>
+    <Section title={translate(locale, "section.support")}>
+      <div class="space-y-4 text-sm leading-relaxed">
+        <p class="text-primary">{translate(locale, "donate.lead")}</p>
+        {
+          support(locale, organization?.email).map((parts) => (
+            <p class="text-secondary"><Citation parts={parts} /></p>
           ))
         }
       </div>
