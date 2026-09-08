@@ -52,7 +52,7 @@
 			"onFail": "warn"
 		}
 	},
-	"allowBuilds": {
+	"allowScripts": {
 		"esbuild": true,
 		"lightningcss": true,
 		"core-js": true,
