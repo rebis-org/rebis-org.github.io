@@ -126,6 +126,7 @@ const ready = async (): Promise<Mermaid> => {
 	if (key !== currentKey) {
 		instance.initialize({
 			startOnLoad: false,
+			securityLevel: "strict",
 			theme:
 				document.documentElement.dataset.theme === "dark" ? "dark" : "default",
 			themeVariables: { background: "transparent", ...palette(colors) },

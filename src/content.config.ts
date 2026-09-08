@@ -7,6 +7,9 @@ import { githubLoader } from "./loaders/github";
 const text = z.string().trim().min(1);
 const count = z.number().int().nonnegative();
 const optionalText = text.optional();
+const httpsUrl = z
+	.url()
+	.refine((value) => value.startsWith("https://"), "expected an https URL");
 
 export const collections = {
 	posts: defineCollection({
@@ -40,7 +43,7 @@ export const collections = {
 					type: z.literal("project"),
 					title: text,
 					description: optionalText,
-					url: z.url(),
+					url: httpsUrl,
 					language: optionalText,
 					license: optionalText,
 					forks: count,
@@ -55,8 +58,8 @@ export const collections = {
 					type: z.literal("member"),
 					login: text,
 					name: text,
-					avatarUrl: z.url(),
-					url: z.url(),
+					avatarUrl: httpsUrl,
+					url: httpsUrl,
 				})
 				.strict(),
 		]),

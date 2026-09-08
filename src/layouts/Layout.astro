@@ -13,7 +13,7 @@ import {
 	path,
 	route as currentRoute,
 } from "../link";
-import { navigation, type Seo, site } from "../site";
+import { navigation, type Seo, site, statusLink } from "../site";
 import "../styles/global.css";
 
 interface Props {
@@ -179,6 +179,13 @@ const navigationClass =
               {title}
             </a>
           ))}
+          <a
+            href={href(statusLink)}
+            {...linkAttributes(statusLink)}
+            class="interactive-link text-secondary text-sm font-medium"
+          >
+            {translate(locale, "nav.status")}
+          </a>
         </div>
       </div>
     </footer>

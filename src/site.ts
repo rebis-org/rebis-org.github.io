@@ -12,8 +12,8 @@ import {
 	formatDate,
 	formatNumber,
 	type Locale,
-	translate,
 	type TranslationKey,
+	translate,
 } from "./i18n";
 import { external, type Link, localized, mail } from "./link";
 
@@ -87,6 +87,9 @@ type NameEntry = Readonly<{ term: string; quotes: readonly Quote[] }>;
 const profileUrl = "https://github.com/rebis-org";
 const codebergUrl = "https://codeberg.org/rebis-org";
 const cnbUrl = "https://cnb.cool/rebis-org";
+const cgitUrl = "https://cgit.rebis.cn";
+const matrixUrl = "https://matrix.to/#/#rebis:matrix.rebis.cn";
+const statusUrl = "https://status.rebis.cn";
 const liberapayUrl = "https://liberapay.com/rebis-org/donate";
 const lkmlUrl = "https://lkml.org/lkml/2000/8/25/132";
 const tagline = "日月不失其體，故蔽而復明；江漢不失其源，故窮而復通。";
@@ -102,6 +105,8 @@ export const site = {
 	logo,
 	profile: external(profileUrl),
 };
+
+export const statusLink = external(statusUrl);
 
 export const pages = {
 	home: {
@@ -172,11 +177,17 @@ const codebergIcon: IconInput =
 	"M 11.959 1.449 A 11.000 11.000 0 0 0 1.000 12.448 A 11.000 11.000 0 0 0 2.680 18.291 L 11.851 6.434 A 0.172 0.128 0 0 1 12.148 6.434 L 21.320 18.291 A 11.000 11.000 0 0 0 23.000 12.448 A 11.000 11.000 0 0 0 12.000 1.449 A 11.000 11.000 0 0 0 11.959 1.449 Z M 12.207 6.583 A 0.096 0.072 0 0 0 12.113 6.668 L 16.351 22.551 A 11.000 11.000 0 0 0 21.320 18.291 L 12.290 6.618 A 0.096 0.072 0 0 0 12.207 6.583 Z";
 const cnbIcon: IconInput =
 	"M 17.168 3.018 C 17.241 2.813 17.168 2.579 17.007 2.433 C 16.451 1.950 15.060 0.926 12.981 0.780 C 10.639 0.605 9.190 1.234 8.458 1.702 C 8.136 1.906 8.121 2.360 8.414 2.579 L 14.372 7.216 C 14.899 7.626 15.675 7.392 15.880 6.763 L 17.153 3.018 H 17.168 Z M 2.470 16.767 C 2.221 16.928 2.119 17.235 2.192 17.513 C 2.412 18.332 3.100 20.015 5.018 21.565 C 6.935 23.101 9.204 23.276 10.171 23.247 C 10.463 23.247 10.712 23.057 10.800 22.779 L 14.621 10.697 C 14.899 9.819 13.918 9.088 13.157 9.600 L 2.470 16.767 Z M 5.266 4.012 C 5.076 3.939 4.871 3.954 4.695 4.041 C 3.993 4.422 2.177 5.607 1.240 8.049 C 0.509 9.922 0.757 11.999 0.962 13.008 C 1.021 13.344 1.372 13.534 1.694 13.403 L 13.157 8.927 C 13.977 8.605 13.977 7.450 13.157 7.128 L 5.266 4.012 Z M 22.277 12.673 C 22.614 12.892 23.068 12.702 23.126 12.307 C 23.273 11.254 23.404 9.440 22.804 8.050 C 21.999 6.222 20.623 5.081 19.964 4.628 C 19.759 4.481 19.481 4.496 19.291 4.671 L 16.392 7.231 C 15.924 7.655 15.968 8.401 16.495 8.752 L 22.277 12.673 Z M 14.182 22.457 C 14.152 22.794 14.445 23.086 14.782 23.042 C 15.880 22.925 18.134 22.486 19.818 20.877 C 21.457 19.312 21.999 17.455 22.145 16.709 C 22.189 16.504 22.145 16.299 22.014 16.138 L 16.948 9.892 C 16.407 9.219 15.309 9.556 15.236 10.419 L 14.182 22.442 V 22.457 Z";
+const gitIcon: IconInput =
+	"M12 1.6 L22.4 12 L12 22.4 L1.6 12 Z M11.9 8 A1.5 1.5 0 1 0 14.9 8 A1.5 1.5 0 1 0 11.9 8 Z M15.7 11.8 A1.5 1.5 0 1 0 18.7 11.8 A1.5 1.5 0 1 0 15.7 11.8 Z M11.9 15.6 A1.5 1.5 0 1 0 14.9 15.6 A1.5 1.5 0 1 0 11.9 15.6 Z M13.4 9.5 L13.4 14.1 M14.46 9.06 L16.14 10.74";
+const matrixIcon: IconInput =
+	"M5.5 2.5 L3.5 2.5 L3.5 21.5 L5.5 21.5 M18.5 2.5 L20.5 2.5 L20.5 21.5 L18.5 21.5 M7.5 17.5 L7.5 9.8 C7.5 8.6 8.4 8 9.75 8 C11.1 8 12 8.9 12 10.2 L12 17.5 M12 10.2 C12 8.9 12.9 8 14.25 8 C15.6 8 16.5 8.9 16.5 10.2 L16.5 17.5";
 
 export const social = (email: string | null | undefined): readonly Social[] => [
 	{ title: "GitHub", link: site.profile, icon: githubIcon },
 	{ title: "Codeberg", link: external(codebergUrl), icon: codebergIcon },
 	{ title: "CNB", link: external(cnbUrl), icon: cnbIcon },
+	{ title: "Git", link: external(cgitUrl), icon: gitIcon },
+	{ title: "Matrix", link: external(matrixUrl), icon: matrixIcon },
 	{ title: "Mail", ...(email ? { link: mail(email) } : {}), icon: Mail },
 ];
 

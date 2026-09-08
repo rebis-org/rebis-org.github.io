@@ -1,6 +1,13 @@
 const json = async (url: string, init: RequestInit): Promise<unknown> => {
-	const response = await fetch(url, init);
-	if (!response.ok) return undefined;
+	const response = await fetch(url, {
+		...init,
+		signal: AbortSignal.timeout(30_000),
+	});
+	if (!response.ok) {
+		throw new Error(
+			`GitHub API request failed with ${response.status} for ${url}`,
+		);
+	}
 	const value: unknown = await response.json();
 	return value;
 };

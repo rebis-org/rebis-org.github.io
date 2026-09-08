@@ -26,18 +26,23 @@ const query = `query Organization($after: String) {
 
 const text = v.pipe(v.string(), v.trim(), v.minLength(1));
 const count = v.pipe(v.number(), v.integer(), v.minValue(0));
+const httpsUrl = v.pipe(
+	v.string(),
+	v.url(),
+	v.check((value) => value.startsWith("https://"), "expected an https URL"),
+);
 const memberIdentitySchema = v.object({ login: text });
 const publicMembersSchema = v.array(memberIdentitySchema);
 const memberSchema = v.object({
 	login: text,
 	name: v.nullish(v.string()),
-	avatarUrl: v.pipe(v.string(), v.url()),
-	url: v.pipe(v.string(), v.url()),
+	avatarUrl: httpsUrl,
+	url: httpsUrl,
 });
 const repositorySchema = v.object({
 	name: text,
 	description: v.nullish(v.string()),
-	url: v.pipe(v.string(), v.url()),
+	url: httpsUrl,
 	updatedAt: v.pipe(v.string(), v.isoTimestamp()),
 	forkCount: count,
 	stargazerCount: count,
@@ -113,14 +118,16 @@ type Snapshot = Readonly<{
 	members: readonly Member[];
 }>;
 
-const collect = async (token: string): Promise<Snapshot | undefined> => {
+const collect = async (token: string): Promise<Snapshot> => {
 	const githubRest = rest(token, restOrigin);
 	const githubGraphql = graphql(token, graphqlEndpoint);
 	const publicMembers = parse(
 		publicMembersSchema,
 		await githubRest.get(publicMembersPath),
 	);
-	if (!publicMembers) return undefined;
+	if (!publicMembers) {
+		throw new Error("github loader: failed to fetch public members");
+	}
 
 	const publicLogins = new Set(publicMembers.map(({ login }) => login));
 	const seen = new Set<string>();
@@ -132,7 +139,9 @@ const collect = async (token: string): Promise<Snapshot | undefined> => {
 			pageSchema,
 			await githubGraphql.query(query, { after: cursor }),
 		);
-		if (!result) return undefined;
+		if (!result) {
+			throw new Error("github loader: failed to fetch repositories");
+		}
 		const organization: RawOrganization = result.data.organization;
 		projects.push(...organization.repositories.nodes.map(projectData));
 		const info: RawOrganization["repositories"]["pageInfo"] =
@@ -146,11 +155,13 @@ const collect = async (token: string): Promise<Snapshot | undefined> => {
 					.map(memberData),
 			};
 		}
-		if (!info.endCursor || seen.has(info.endCursor)) return undefined;
+		if (!info.endCursor || seen.has(info.endCursor)) {
+			throw new Error("github loader: unexpected pagination cursor");
+		}
 		seen.add(info.endCursor);
 		cursor = info.endCursor;
 	}
-	return undefined;
+	throw new Error("github loader: exceeded repository pagination limit");
 };
 
 export const githubLoader = {
@@ -163,7 +174,6 @@ export const githubLoader = {
 		const token = env.GITHUB_TOKEN;
 		if (!token) return;
 		const snapshot = await collect(token);
-		if (!snapshot) return;
 
 		const entry = (
 			id: string,
