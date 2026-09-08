@@ -22,12 +22,12 @@ const seo: Seo = {
 ---
 
 <Layout seo={seo} {locale}>
-  <Page header={{ title, subtitle }}>
-    <p class="text-secondary mb-8 max-w-md text-base leading-relaxed">
-      {message}
-    </p>
-    <a href={href(home)} class="interactive-link text-sm font-medium">
-      {translate(locale, "error.home")}
-    </a>
-  </Page>
+	<Page header={{ title, subtitle }}>
+		<p class="text-secondary mb-8 max-w-md text-base leading-relaxed">
+			{message}
+		</p>
+		<a href={href(home)} class="interactive-link text-sm font-medium">
+			{translate(locale, "error.home")}
+		</a>
+	</Page>
 </Layout>

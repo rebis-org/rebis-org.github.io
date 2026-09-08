@@ -6,10 +6,10 @@
 		"build": "astro build",
 		"check": "astro check",
 		"dev": "astro dev",
-		"fmt": "biome format --write astro.config.ts package.json src .github",
-		"fmt:check": "biome format astro.config.ts package.json src .github",
-		"lint": "biome lint astro.config.ts src/*.ts src/*/*.ts src/*/*/*.ts",
-		"quality": "biome check astro.config.ts src/*.ts src/*/*.ts src/*/*/*.ts",
+		"fmt": "biome format --write astro.config.ts biome.json eslint.config.ts package.json src .github && prettier --write \"src/**/*.astro\"",
+		"fmt:check": "biome format astro.config.ts biome.json eslint.config.ts package.json src .github && prettier --check \"src/**/*.astro\"",
+		"lint": "biome lint astro.config.ts eslint.config.ts src/*.ts src/*/*.ts src/*/*/*.ts && eslint src",
+		"quality": "biome check astro.config.ts eslint.config.ts src/*.ts src/*/*.ts src/*/*/*.ts && eslint src && prettier --check \"src/**/*.astro\"",
 		"preview": "astro preview"
 	},
 	"dependencies": {
@@ -35,8 +35,14 @@
 		"@astrojs/check": "0.9.10",
 		"@biomejs/biome": "2.5.12",
 		"@types/node": "^26.1.2",
+		"eslint": "^10.10.0",
+		"eslint-plugin-astro": "^3.1.0",
+		"jiti": "^2.7.0",
 		"lightningcss": "^1.33.0",
+		"prettier": "^3.9.6",
+		"prettier-plugin-astro": "^0.14.1",
 		"typescript": "6.0.3",
+		"typescript-eslint": "^8.70.0",
 		"wrangler": "^4.120.0"
 	},
 	"devEngines": {
