@@ -35,3 +35,4 @@ jobs:
       - run: nub run build
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - run: node_modules/.bin/jiti ./scripts/smoke.ts

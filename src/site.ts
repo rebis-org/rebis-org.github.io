@@ -100,7 +100,7 @@ const statusUrl = "https://status.rebis.cn";
 const liberapayUrl = "https://liberapay.com/rebis-org/donate";
 const lkmlUrl = "https://lkml.org/lkml/2000/8/25/132";
 const tagline = "日月不失其體，故蔽而復明；江漢不失其源，故窮而復通。";
-const logo = { light: "/logo/lignt.webp", dark: "/logo/dark.webp" };
+const logo = { light: "/logo/light.webp", dark: "/logo/dark.webp" };
 export const seo = (title: string, description: string = tagline): Seo => ({
 	title,
 	description,
