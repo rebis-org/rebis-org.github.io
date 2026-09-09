@@ -100,35 +100,41 @@ const zh = {
 } satisfies Dictionary;
 
 const catalog: Record<Locale, Dictionary> = { "en-us": en, "zh-cn": zh };
-const localeTags = new Map<Locale, string>();
-const dateFormats = new Map<Locale, Intl.DateTimeFormat>();
-const numberFormats = new Map<Locale, Intl.NumberFormat>();
 
-export const localeTag = (locale: Locale): string => {
-	const cached = localeTags.get(locale);
-	if (cached) return cached;
-	const tag = new Intl.Locale(locale).baseName;
-	localeTags.set(locale, tag);
-	return tag;
+const memo = <K, V>(make: (key: K) => V): ((key: K) => V) => {
+	const cache = new Map<K, V>();
+	return (key) => {
+		const hit = cache.get(key);
+		if (hit !== undefined) return hit;
+		const value = make(key);
+		cache.set(key, value);
+		return value;
+	};
 };
+
+export const localeTag = memo(
+	(locale: Locale): string => new Intl.Locale(locale).baseName,
+);
 
 export const translate = (locale: Locale, key: TranslationKey): string =>
 	catalog[locale][key];
 
-export const formatDate = (locale: Locale, value: Date | string): string => {
-	const cached = dateFormats.get(locale);
-	if (cached) return cached.format(new Date(value));
-	const formatter = new Intl.DateTimeFormat(localeTag(locale), {
-		dateStyle: "medium",
-	});
-	dateFormats.set(locale, formatter);
-	return formatter.format(new Date(value));
-};
+export const pickLocale = (languages: readonly string[]): Locale =>
+	languages.some((value) => /^zh-(cn|hans)(?:-|$)/i.test(value))
+		? "zh-cn"
+		: "en-us";
 
-export const formatNumber = (locale: Locale, value: number): string => {
-	const cached = numberFormats.get(locale);
-	if (cached) return cached.format(value);
-	const formatter = new Intl.NumberFormat(localeTag(locale));
-	numberFormats.set(locale, formatter);
-	return formatter.format(value);
-};
+const dateFormat = memo(
+	(locale: Locale): Intl.DateTimeFormat =>
+		new Intl.DateTimeFormat(localeTag(locale), { dateStyle: "medium" }),
+);
+const numberFormat = memo(
+	(locale: Locale): Intl.NumberFormat =>
+		new Intl.NumberFormat(localeTag(locale)),
+);
+
+export const formatDate = (locale: Locale, value: Date | string): string =>
+	dateFormat(locale).format(new Date(value));
+
+export const formatNumber = (locale: Locale, value: number): string =>
+	numberFormat(locale).format(value);

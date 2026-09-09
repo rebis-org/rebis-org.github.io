@@ -1,4 +1,16 @@
+import type { IconInput } from "morphicons";
 import { createMorph } from "morphicons/dom";
+
+export const morpher = (
+	path: SVGPathElement,
+	from: IconInput | string,
+): ((to: IconInput | string) => void) => {
+	let morph: ReturnType<typeof createMorph> | undefined;
+	return (to) => {
+		morph ??= createMorph(path, from, { reducedMotion: "user" });
+		morph.morphTo(to);
+	};
+};
 
 export const initMorph = (root: ParentNode = document): void => {
 	for (const trigger of root.querySelectorAll<HTMLElement>("[data-morph]")) {
@@ -12,11 +24,7 @@ export const initMorph = (root: ParentNode = document): void => {
 		const to = svg?.dataset.morphTo;
 		if (!svg || !path || from === undefined || to === undefined) continue;
 
-		let morph: ReturnType<typeof createMorph> | undefined;
-		const transition = (target: string): void => {
-			morph ??= createMorph(path, from, { reducedMotion: "user" });
-			morph.morphTo(target);
-		};
+		const transition = morpher(path, from);
 		const enter = (): void => transition(to);
 		const leave = (): void => transition(from);
 		trigger.addEventListener("pointerenter", enter);

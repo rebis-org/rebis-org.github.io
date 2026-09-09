@@ -58,89 +58,79 @@ const arrow = external ? ExternalLink : ArrowRight;
 		},
 	]}
 >
-	{
-		props.variant === "card" && (
-			<div class="flex-grow pr-4">
-				<div class="mb-2 flex items-center gap-2">
-					<h2 class="text-primary text-lg font-semibold">{props.title}</h2>
-					{props.meta && (
-						<span class="text-secondary rounded-full px-2 py-0.5 text-xs font-medium">
-							{props.meta}
-						</span>
-					)}
-				</div>
-				{props.description && (
-					<div class="text-secondary text-sm leading-relaxed">
-						{props.description}
-					</div>
-				)}
-				{props.details && (
-					<div class="text-secondary mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-relaxed">
-						{props.details.map((detail) => (
-							<span
-								class="flex items-center gap-1.5"
-								aria-label={`${detail.label}: ${detail.value}`}
-							>
-								{detail.icon && <Icon icon={detail.icon} size={16} />}
-								{detail.value}
-							</span>
-						))}
-					</div>
-				)}
-			</div>
-		)
-	}
-	{
-		props.variant === "resume" && (
-			<>
-				<div>
-					<h3 class="resume-title text-primary font-semibold">{props.title}</h3>
-					<p class="resume-description text-secondary">{props.description}</p>
-				</div>
-				<p class="resume-meta text-secondary font-medium">{props.meta}</p>
-			</>
-		)
-	}
-	{
-		props.variant === "social" && (
-			<div class="bg-transparent flex h-12 w-12 items-center justify-center rounded-full">
-				<Icon icon={props.icon} size={22} class="text-secondary" />
-			</div>
-		)
-	}
-	{
-		props.variant === "social-box" && (
-			<>
-				<div class="social-icon bg-transparent rounded-full">
-					<Icon icon={props.icon} size={18} class="text-primary" />
-				</div>
-				<div class="flex w-full items-center justify-between">
-					<span class="text-primary inline-flex items-center text-sm font-medium">
-						{props.title}
+	{props.variant === "card" && (
+		<div class="flex-grow pr-4">
+			<div class="mb-2 flex items-center gap-2">
+				<h2 class="text-primary text-lg font-semibold">{props.title}</h2>
+				{props.meta && (
+					<span class="text-secondary rounded-full px-2 py-0.5 text-xs font-medium">
+						{props.meta}
 					</span>
-					{props.link && (
-						<Icon
-							icon={ArrowRight}
-							size={16}
-							class="text-secondary"
-							morphTo={ArrowUpRight}
-						/>
-					)}
+				)}
+			</div>
+			{props.description && (
+				<div class="text-secondary text-sm leading-relaxed">
+					{props.description}
 				</div>
-			</>
-		)
-	}
-	{
-		props.variant === "link" && (
-			<>
-				{props.title}
-				<Icon
-					icon={arrow}
-					size={12}
-					class="text-secondary"
-					morphTo={props.link ? ArrowUpRight : undefined}
-				/>
-			</>
-		)
-	}
+			)}
+			{props.details && (
+				<div class="text-secondary mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-relaxed">
+					{props.details.map((detail) => (
+						<span
+							class="flex items-center gap-1.5"
+							aria-label={`${detail.label}: ${detail.value}`}
+						>
+							{detail.icon && <Icon icon={detail.icon} size={16} />}
+							{detail.value}
+						</span>
+					))}
+				</div>
+			)}
+		</div>
+	)}
+	{props.variant === "resume" && (
+		<>
+			<div>
+				<h3 class="resume-title text-primary font-semibold">{props.title}</h3>
+				<p class="resume-description text-secondary">{props.description}</p>
+			</div>
+			<p class="resume-meta text-secondary font-medium">{props.meta}</p>
+		</>
+	)}
+	{props.variant === "social" && (
+		<div class="bg-transparent flex h-12 w-12 items-center justify-center rounded-full">
+			<Icon icon={props.icon} size={22} class="text-secondary" />
+		</div>
+	)}
+	{props.variant === "social-box" && (
+		<>
+			<div class="social-icon bg-transparent rounded-full">
+				<Icon icon={props.icon} size={18} class="text-primary" />
+			</div>
+			<div class="flex w-full items-center justify-between">
+				<span class="text-primary inline-flex items-center text-sm font-medium">
+					{props.title}
+				</span>
+				{props.link && (
+					<Icon
+						icon={ArrowRight}
+						size={16}
+						class="text-secondary"
+						morphTo={ArrowUpRight}
+					/>
+				)}
+			</div>
+		</>
+	)}
+	{props.variant === "link" && (
+		<>
+			{props.title}
+			<Icon
+				icon={arrow}
+				size={12}
+				class="text-secondary"
+				morphTo={props.link ? ArrowUpRight : undefined}
+			/>
+		</>
+	)}
 </Element>

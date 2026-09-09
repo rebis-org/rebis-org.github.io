@@ -23,12 +23,13 @@ export const external = (value: string): Link => create("external", value);
 export const mail = (address: string): Link =>
 	create("mail", `mailto:${address}`);
 
+const hasBase = (pathname: string): boolean =>
+	!!basePrefix &&
+	(pathname === basePrefix || pathname.startsWith(`${basePrefix}/`));
+
 export const path = (value: string): string => {
 	const pathname = `/${value.replace(/^\/+/, "")}`;
-	return basePrefix &&
-		(pathname === basePrefix || pathname.startsWith(`${basePrefix}/`))
-		? pathname
-		: `${base}${pathname.slice(1)}`;
+	return hasBase(pathname) ? pathname : `${base}${pathname.slice(1)}`;
 };
 
 export const localized = (locale: Locale, route = "/"): Link =>
@@ -46,11 +47,9 @@ export const href = (link: Link): string =>
 	link.kind === "internal" ? path(link.value) : link.value;
 
 export const route = (url: URL): string => {
-	const pathname =
-		basePrefix &&
-		(url.pathname === basePrefix || url.pathname.startsWith(`${basePrefix}/`))
-			? url.pathname.slice(basePrefix.length)
-			: url.pathname;
+	const pathname = hasBase(url.pathname)
+		? url.pathname.slice(basePrefix.length) || "/"
+		: url.pathname;
 	return pathname.replace(localePrefix, "") || "/";
 };
 

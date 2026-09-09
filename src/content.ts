@@ -28,9 +28,17 @@ export const sortedPostEntries = async (locale: Locale): Promise<PostEntry[]> =>
 export const posts = async (locale: Locale): Promise<readonly Article[]> =>
 	(await sortedPostEntries(locale)).map((entry) => article(entry, locale));
 
-const githubEntries = async (): Promise<readonly GithubEntry[]> => {
-	return (await githubOrganization()) ? getCollection("github") : [];
-};
+const ofType =
+	<Type extends GithubEntry["data"]["type"]>(type: Type) =>
+	(
+		entry: GithubEntry,
+	): entry is GithubEntry & {
+		data: Extract<GithubEntry["data"], { type: Type }>;
+	} =>
+		entry.data.type === type;
+
+const githubEntries = async (): Promise<readonly GithubEntry[]> =>
+	(await githubOrganization()) ? getCollection("github") : [];
 
 export const githubOrganization = async (): Promise<
 	Organization | undefined
@@ -40,11 +48,10 @@ export const githubOrganization = async (): Promise<
 };
 
 export const githubProjects = async (): Promise<readonly Project[]> =>
-	(await githubEntries()).flatMap((entry) =>
-		entry.data.type === "project" ? [entry.data] : [],
-	);
+	(await githubEntries()).filter(ofType("project")).map(({ data }) => data);
 
 export const githubMembers = async (): Promise<readonly Member[]> =>
 	(await githubEntries())
-		.flatMap((entry) => (entry.data.type === "member" ? [entry.data] : []))
+		.filter(ofType("member"))
+		.map(({ data }) => data)
 		.toSorted((left, right) => left.login.localeCompare(right.login));

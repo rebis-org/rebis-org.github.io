@@ -7,5 +7,7 @@ const { title } = Astro.props;
 
 <section class="section-layout">
 	<h2 class="section-title text-primary font-medium">{title}</h2>
-	<div class="section-content"><slot /></div>
+	<div class="section-content">
+		<slot />
+	</div>
 </section>

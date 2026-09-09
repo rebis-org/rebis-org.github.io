@@ -51,11 +51,13 @@ export const diagrams = defineHastPlugin({
 			}
 			const meta = (code as Readonly<{ data?: Readonly<{ meta?: string }> }>)
 				.data?.meta;
-			const width = meta?.match(/\bw-(\d+)/)?.[1];
-			const height = meta?.match(/\bh-(\d+)/)?.[1];
-			const titleMatch = meta?.match(/\btitle=(?:"([^"]*)"|'([^']*)')/);
-			const title = titleMatch?.[1] ?? titleMatch?.[2];
-			const alignValue = meta?.match(/\balign=(left|right|center)\b/)?.[1];
+			const at = (pattern: RegExp): string | undefined =>
+				meta?.match(pattern)?.[1];
+			const width = at(/\bw-(\d+)/);
+			const height = at(/\bh-(\d+)/);
+			const titleMatch = meta?.match(/\btitle=(?:"([^"]*)"|'([^']*)'|(\S+))/);
+			const title = titleMatch?.[1] ?? titleMatch?.[2] ?? titleMatch?.[3];
+			const alignValue = at(/\balign=(left|right|center)\b/);
 			const align =
 				alignValue === "left" ||
 				alignValue === "right" ||

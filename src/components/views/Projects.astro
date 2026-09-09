@@ -17,17 +17,15 @@ const items = (await githubProjects()).filter((project) => project.license);
 <Layout seo={pages.projects.seo} {locale}>
 	<Page header={header(locale, "projects")}>
 		<div class="grid grid-cols-1 gap-6">
-			{
-				items.map((project) => (
-					<Item
-						variant="card"
-						link={external(project.url)}
-						title={project.title}
-						description={project.description}
-						details={projectDetails(project, locale)}
-					/>
-				))
-			}
+			{items.map((project) => (
+				<Item
+					variant="card"
+					link={external(project.url)}
+					title={project.title}
+					description={project.description}
+					details={projectDetails(project, locale)}
+				/>
+			))}
 		</div>
 	</Page>
 </Layout>

@@ -23,57 +23,49 @@ const [organization, members] = await Promise.all([
 	<Page header={header(locale, "about")}>
 		<Section title={translate(locale, "section.name")}>
 			<div class="space-y-8">
-				{
-					pages.about.name.map(({ term, quotes }) => (
-						<div class="space-y-3">
-							<h3 class="text-primary text-lg font-semibold">{term}</h3>
-							{quotes.map(({ text, source }) => (
-								<blockquote class="text-secondary border-secondary space-y-1 border-s-2 ps-4">
-									<p>{text}</p>
-									<footer class="text-xs">
-										<Citation parts={source} />
-									</footer>
-								</blockquote>
-							))}
-						</div>
-					))
-				}
+				{pages.about.name.map(({ term, quotes }) => (
+					<div class="space-y-3">
+						<h3 class="text-primary text-lg font-semibold">{term}</h3>
+						{quotes.map(({ text, source }) => (
+							<blockquote class="text-secondary border-secondary space-y-1 border-s-2 ps-4">
+								<p>{text}</p>
+								<footer class="text-xs">
+									<Citation parts={source} />
+								</footer>
+							</blockquote>
+						))}
+					</div>
+				))}
 			</div>
 		</Section>
 		<Section title={translate(locale, "section.members")}>
 			<div class="section-items--members grid grid-cols-1">
-				{
-					members.map((member) => (
-						<Item
-							variant="resume"
-							link={external(member.url)}
-							title={member.name}
-							description={`@${member.login}`}
-							meta="GitHub"
-						/>
-					))
-				}
+				{members.map((member) => (
+					<Item
+						variant="resume"
+						link={external(member.url)}
+						title={member.name}
+						description={`@${member.login}`}
+						meta="GitHub"
+					/>
+				))}
 			</div>
 		</Section>
 		<Section title={translate(locale, "section.connect")}>
 			<div class="social-grid">
-				{
-					social(organization?.email).map(({ title, link, icon }) => (
-						<Item variant="social-box" link={link} title={title} icon={icon} />
-					))
-				}
+				{social(organization?.email).map(({ title, link, icon }) => (
+					<Item variant="social-box" link={link} title={title} icon={icon} />
+				))}
 			</div>
 		</Section>
 		<Section title={translate(locale, "section.support")}>
 			<div class="space-y-4 text-sm leading-relaxed">
 				<p class="text-primary">{translate(locale, "donate.lead")}</p>
-				{
-					support(locale, organization?.email).map((parts) => (
-						<p class="text-secondary">
-							<Citation parts={parts} />
-						</p>
-					))
-				}
+				{support(locale, organization?.email).map((parts) => (
+					<p class="text-secondary">
+						<Citation parts={parts} />
+					</p>
+				))}
 			</div>
 		</Section>
 	</Page>

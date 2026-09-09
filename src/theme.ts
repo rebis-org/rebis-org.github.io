@@ -1,6 +1,6 @@
 import { Moon, Sun } from "lucide";
 import type { IconInput } from "morphicons";
-import { createMorph } from "morphicons/dom";
+import { morpher } from "./styles/morph";
 
 export type Theme = "light" | "dark";
 
@@ -23,17 +23,12 @@ export const installThemeToggle = (root: ParentNode = document): void => {
 	if (!toggle || toggle.dataset.ready === "true") return;
 	toggle.dataset.ready = "true";
 	const path = root.querySelector<SVGPathElement>("#theme-icon path");
-	let morph: ReturnType<typeof createMorph> | undefined;
+	let transition: ReturnType<typeof morpher> | undefined;
 
 	const paint = (theme: Theme, from: Theme, animate: boolean): void => {
-		if (!path) return;
-		const target = icon(theme);
-		if (!animate) {
-			morph ??= createMorph(path, target, { reducedMotion: "user" });
-			return;
-		}
-		morph ??= createMorph(path, icon(from), { reducedMotion: "user" });
-		morph.morphTo(target);
+		if (!path || !animate) return;
+		transition ??= morpher(path, icon(from));
+		transition(icon(theme));
 	};
 
 	const apply = (theme: Theme, from: Theme, interactive: boolean): void => {
@@ -49,8 +44,7 @@ export const installThemeToggle = (root: ParentNode = document): void => {
 		if (interactive) localStorage.setItem(storageKey, theme);
 	};
 
-	const initial = currentTheme();
-	apply(initial, initial, false);
+	apply(currentTheme(), currentTheme(), false);
 	toggle.addEventListener("click", () => {
 		const from = currentTheme();
 		const next: Theme = from === "dark" ? "light" : "dark";

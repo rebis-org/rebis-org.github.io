@@ -2,11 +2,9 @@ import { env } from "node:process";
 import type { Loader } from "astro/loaders";
 import * as v from "valibot";
 import type { Member, Organization, Project } from "../../site";
-import { graphql } from "./graphql";
-import { rest } from "./rest";
+import { client } from "./client";
 
 const login = "rebis-org";
-const graphqlEndpoint = "https://api.github.com/graphql";
 const restOrigin = "https://api.github.com";
 const pageLimit = 100;
 const publicMembersPath = `/orgs/${login}/public_members?per_page=100`;
@@ -82,6 +80,12 @@ const parse = <Schema extends v.GenericSchema>(
 	return result.success ? result.output : undefined;
 };
 
+const optional = <K extends string, V>(
+	key: K,
+	value: V | null | undefined,
+): Record<string, never> | Record<K, NonNullable<V>> =>
+	value ? ({ [key]: value } as Record<K, NonNullable<V>>) : {};
+
 const organizationData = ({ name, email }: RawOrganization): Organization => ({
 	type: "organization",
 	name,
@@ -91,12 +95,10 @@ const organizationData = ({ name, email }: RawOrganization): Organization => ({
 const projectData = (repository: RawRepository): Project => ({
 	type: "project",
 	title: repository.name,
-	...(repository.description ? { description: repository.description } : {}),
+	...optional("description", repository.description),
 	url: repository.url,
-	...(repository.primaryLanguage
-		? { language: repository.primaryLanguage.name }
-		: {}),
-	...(repository.licenseInfo ? { license: repository.licenseInfo.spdxId } : {}),
+	...optional("language", repository.primaryLanguage?.name),
+	...optional("license", repository.licenseInfo?.spdxId),
 	forks: repository.forkCount,
 	stars: repository.stargazerCount,
 	issues: repository.issues.totalCount,
@@ -119,11 +121,10 @@ type Snapshot = Readonly<{
 }>;
 
 const collect = async (token: string): Promise<Snapshot> => {
-	const githubRest = rest(token, restOrigin);
-	const githubGraphql = graphql(token, graphqlEndpoint);
+	const github = client(token, restOrigin);
 	const publicMembers = parse(
 		publicMembersSchema,
-		await githubRest.get(publicMembersPath),
+		await github.get(publicMembersPath),
 	);
 	if (!publicMembers) {
 		throw new Error("github loader: failed to fetch public members");
@@ -137,7 +138,7 @@ const collect = async (token: string): Promise<Snapshot> => {
 	for (let page = 0; page < pageLimit; page += 1) {
 		const result: Page | undefined = parse(
 			pageSchema,
-			await githubGraphql.query(query, { after: cursor }),
+			await github.query(query, { after: cursor }),
 		);
 		if (!result) {
 			throw new Error("github loader: failed to fetch repositories");
@@ -174,25 +175,19 @@ export const githubLoader = {
 		const token = env.GITHUB_TOKEN;
 		if (!token) return;
 		const snapshot = await collect(token);
-
-		const entry = (
-			id: string,
-			data: GithubData,
-		): readonly [string, GithubData] => [id, data];
 		const entries: readonly (readonly [string, GithubData])[] = [
-			entry("organization", snapshot.organization),
-			...snapshot.projects.map((project) =>
-				entry(`project:${project.title}`, project),
+			["organization", snapshot.organization],
+			...snapshot.projects.map(
+				(project) => [`project:${project.title}`, project] as const,
 			),
-			...snapshot.members.map((member) =>
-				entry(`member:${member.login}`, member),
+			...snapshot.members.map(
+				(member) => [`member:${member.login}`, member] as const,
 			),
 		];
-		const parsed = await Promise.all(
-			entries.map(async ([id, data]) => {
-				return { id, data: await parseData({ id, data }) };
-			}),
+		await Promise.all(
+			entries.map(async ([id, data]) =>
+				store.set({ id, data: await parseData({ id, data }) }),
+			),
 		);
-		for (const entry of parsed) store.set(entry);
 	},
 } satisfies Loader;

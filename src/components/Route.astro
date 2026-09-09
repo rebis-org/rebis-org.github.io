@@ -24,10 +24,8 @@ const props = Astro.props;
 const View = props.kind === "page" ? views[props.page] : undefined;
 ---
 
-{
-	props.kind === "post" ? (
-		<Post entry={props.entry} locale={props.locale} />
-	) : (
-		View && <View locale={props.locale} />
-	)
-}
+{props.kind === "post" ? (
+	<Post entry={props.entry} locale={props.locale} />
+) : (
+	View && <View locale={props.locale} />
+)}

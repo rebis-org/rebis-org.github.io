@@ -80,20 +80,16 @@ const navigationClass =
 		<Font cssVariable="--font-noto-sans" preload />
 		<Font cssVariable="--font-noto-sans-sc" />
 		<Font cssVariable="--font-maple-mono" />
-		{
-			stylesheets.map((stylesheet) => (
-				<link rel="stylesheet" href={stylesheet} />
-			))
-		}
+		{stylesheets.map((stylesheet) => (
+			<link rel="stylesheet" href={stylesheet} />
+		))}
 	</head>
 	<body>
 		<a class="skip-link" href="#main-content">
 			{translate(locale, "accessibility.skipToMain")}
 		</a>
 		<header>
-			<div
-				class="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-y-2 px-6 py-5 sm:flex-nowrap"
-			>
+			<div class="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-y-2 px-6 py-5 sm:flex-nowrap">
 				<a href={logoLink} aria-label="Home" data-astro-prefetch>
 					<Image
 						src={path(site.logo.light)}
@@ -118,20 +114,18 @@ const navigationClass =
 				</a>
 				<nav class="site-navigation w-full sm:w-auto">
 					<ul class="grid grid-cols-3 items-center gap-1 sm:(flex gap-4)">
-						{
-							links.map(({ title, link }) => (
-								<li>
-									<a
-										class={navigationClass}
-										href={href(link)}
-										{...linkAttributes(link)}
-										data-astro-prefetch
-									>
-										{title}
-									</a>
-								</li>
-							))
-						}
+						{links.map(({ title, link }) => (
+							<li>
+								<a
+									class={navigationClass}
+									href={href(link)}
+									{...linkAttributes(link)}
+									data-astro-prefetch
+								>
+									{title}
+								</a>
+							</li>
+						))}
 						<li>
 							<a
 								class={navigationClass}
@@ -168,26 +162,22 @@ const navigationClass =
 			<slot />
 		</main>
 		<footer class="mt-16 py-8">
-			<div
-				class="mx-auto flex max-w-2xl flex-col gap-4 px-6 sm:(flex-row items-center justify-between)"
-			>
+			<div class="mx-auto flex max-w-2xl flex-col gap-4 px-6 sm:(flex-row items-center justify-between)">
 				<p class="text-secondary text-sm font-medium">
 					© {new Date().getFullYear()}
 					{organization?.name ?? "N/A"}
 				</p>
 				<div class="flex flex-wrap gap-x-6 gap-y-2">
-					{
-						links.map(({ title, link }) => (
-							<a
-								href={href(link)}
-								{...linkAttributes(link)}
-								class="interactive-link text-secondary text-sm font-medium"
-								data-astro-prefetch
-							>
-								{title}
-							</a>
-						))
-					}
+					{links.map(({ title, link }) => (
+						<a
+							href={href(link)}
+							{...linkAttributes(link)}
+							class="interactive-link text-secondary text-sm font-medium"
+							data-astro-prefetch
+						>
+							{title}
+						</a>
+					))}
 					<a
 						href={href(statusLink)}
 						{...linkAttributes(statusLink)}
@@ -198,44 +188,10 @@ const navigationClass =
 				</div>
 			</div>
 		</footer>
-	</body><script>
-		import { observeMermaid, observeTheme } from "../mermaid";
-		import { initMorph } from "../styles/morph";
-		import { installThemeToggle } from "../theme";
-
-		const panguValues = [
-			"normal",
-			"no-autospace",
-			"ideograph-alpha",
-			"ideograph-numeric",
-			"insert",
-			"replace",
-			"ideograph-alpha ideograph-numeric punctuation",
-			"ideograph-alpha ideograph-numeric",
-			"ideograph-alpha ideograph-numeric insert",
-			"auto",
-		];
-		const hasPangu = panguValues.some((value) =>
-			CSS.supports("text-autospace", value),
-		);
-		let pangu: Promise<(typeof import("pangu/browser"))["default"]> | undefined;
-		const spaceText = async (): Promise<void> => {
-			if (hasPangu || !document.body) return;
-			pangu ??= import("pangu/browser").then(
-				({ default: instance }) => instance,
-			);
-			(await pangu).spacingNode(document.body);
-		};
-
-		const boot = (): void => {
-			installThemeToggle();
-			initMorph();
-			observeMermaid();
-			void spaceText();
-		};
-
+	</body>
+	<script>
+		import { boot } from "../boot";
 		boot();
 		document.addEventListener("astro:page-load", boot);
-		observeTheme();
 	</script>
 </html>

@@ -16,6 +16,34 @@ import { diagrams, mathematics } from "./src/markdown";
 
 const base = `${(process.env.ASTRO_BASE ?? "").replace(/\/+$/, "")}/`;
 
+const google = (
+	name: string,
+	cssVariable: string,
+	subsets: [string, ...string[]],
+) => ({
+	provider: fontProviders.google(),
+	name,
+	cssVariable,
+	weights: ["100 900"] as [string],
+	styles: ["normal"] as ["normal"],
+	subsets,
+	fallbacks: ["sans-serif"],
+});
+
+const fontsource = (
+	name: string,
+	cssVariable: string,
+	fallbacks: string[],
+) => ({
+	provider: fontProviders.fontsource(),
+	name,
+	cssVariable,
+	weights: [400] as [number],
+	styles: ["normal"] as ["normal"],
+	subsets: ["latin"] as [string],
+	fallbacks,
+});
+
 export default defineConfig({
 	site: process.env.SITE_URL || "https://rebis.cn",
 	base,
@@ -53,33 +81,12 @@ export default defineConfig({
 		},
 	},
 	fonts: [
-		{
-			provider: fontProviders.google(),
-			name: "Noto Sans",
-			cssVariable: "--font-noto-sans",
-			weights: ["100 900"],
-			styles: ["normal"],
-			subsets: ["latin"],
-			fallbacks: ["sans-serif"],
-		},
-		{
-			provider: fontProviders.google(),
-			name: "Noto Sans SC",
-			cssVariable: "--font-noto-sans-sc",
-			weights: ["100 900"],
-			styles: ["normal"],
-			subsets: ["latin", "chinese-simplified"],
-			fallbacks: ["sans-serif"],
-		},
-		{
-			provider: fontProviders.fontsource(),
-			name: "Maple Mono",
-			cssVariable: "--font-maple-mono",
-			weights: [400],
-			styles: ["normal"],
-			subsets: ["latin"],
-			fallbacks: ["monospace"],
-		},
+		google("Noto Sans", "--font-noto-sans", ["latin"]),
+		google("Noto Sans SC", "--font-noto-sans-sc", [
+			"latin",
+			"chinese-simplified",
+		]),
+		fontsource("Maple Mono", "--font-maple-mono", ["monospace"]),
 	],
 	integrations: [
 		mdx(),
