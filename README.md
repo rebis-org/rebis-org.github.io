@@ -10,3 +10,5 @@ Website for 盐梅 Rebis
 ## License
 
 See [NOTICE](./NOTICE).
+
+The third-party marks reproduced in `src/icons.ts` (GitHub, Codeberg, CNB, Git, cgit, and Matrix) remain the property of their respective owners; this project asserts no rights over them and is not affiliated with, endorsed by, or sponsored by any of these organizations.
