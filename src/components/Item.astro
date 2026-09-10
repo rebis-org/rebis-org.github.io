@@ -63,7 +63,7 @@ const arrow = external ? ExternalLink : ArrowRight;
 			<div class="mb-2 flex items-center gap-2">
 				<h2 class="text-primary text-lg font-semibold">{props.title}</h2>
 				{props.meta && (
-					<span class="text-secondary rounded-full px-2 py-0.5 text-xs font-medium">
+					<span class="text-secondary rounded-full px-2 py-0.5 font-mono text-xs font-medium tabular-nums">
 						{props.meta}
 					</span>
 				)}
@@ -74,7 +74,7 @@ const arrow = external ? ExternalLink : ArrowRight;
 				</div>
 			)}
 			{props.details && (
-				<div class="text-secondary mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-relaxed">
+				<div class="text-secondary mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-sm leading-relaxed tabular-nums">
 					{props.details.map((detail) => (
 						<span
 							class="flex items-center gap-1.5"
