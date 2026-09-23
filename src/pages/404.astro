@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en-US">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>404</title>
+		<script>
+			import { pickLocale } from "../i18n";
+			const base = import.meta.env.BASE_URL;
+			const prefix = base.replace(/\/+$/, "");
+			const pathname =
+				prefix && location.pathname.startsWith(`${prefix}/`)
+					? location.pathname.slice(prefix.length)
+					: location.pathname;
+			const locale =
+				/^\/(en-us|zh-cn)(?:\/|$)/.exec(pathname)?.[1] ??
+				pickLocale(navigator.languages ?? [navigator.language]);
+			location.replace(`${base}${locale}/404/`);
+		</script>
+		<noscript>
+			<meta
+				http-equiv="refresh"
+				content={`0; url=${import.meta.env.BASE_URL}en-us/404/`}
+			/>
+		</noscript>
+	</head>
+</html>

@@ -1,0 +1,16 @@
+---
+import Error from "../../components/views/Error.astro";
+import { type Locale, locales } from "../../i18n";
+
+type StaticPath = Readonly<{
+	readonly params: Readonly<{ locale: Locale }>;
+	readonly props: Readonly<{ locale: Locale }>;
+}>;
+
+export const getStaticPaths = (): readonly StaticPath[] =>
+	locales.map((locale) => ({ params: { locale }, props: { locale } }));
+
+const { locale } = Astro.props;
+---
+
+<Error code="404" {locale} />

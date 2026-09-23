@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en-US">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Redirecting</title>
+		<script>
+			import { pickLocale } from "../i18n";
+			location.replace(
+				`${import.meta.env.BASE_URL}${pickLocale(navigator.languages ?? [navigator.language])}/`,
+			);
+		</script>
+		<noscript>
+			<meta
+				http-equiv="refresh"
+				content={`0; url=${import.meta.env.BASE_URL}en-us/`}
+			/>
+		</noscript>
+	</head>
+</html>
