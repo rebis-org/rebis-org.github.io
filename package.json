@@ -23,7 +23,7 @@
 		"@unocss/preset-typography": "66.10.0",
 		"@unocss/preset-wind4": "66.10.0",
 		"@unocss/transformer-variant-group": "66.10.0",
-		"astro": "7.3.2",
+		"astro": "7.3.3",
 		"katex": "^0.18.1",
 		"lucide": "^1.29.0",
 		"mermaid": "^11.16.1",
