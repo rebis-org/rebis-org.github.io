@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-US">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>404</title>
+		<script>
+			import { pickLocale, sniffLocale } from "../i18n";
+			import { stripBase } from "../link";
+
+			const locale =
+				sniffLocale(stripBase(location.pathname)) ??
+				pickLocale(navigator.languages ?? [navigator.language]);
+			location.replace(`${import.meta.env.BASE_URL}${locale}/404/`);
+		</script>
+		<noscript>
+			<meta
+				http-equiv="refresh"
+				content={`0; url=${import.meta.env.BASE_URL}en-us/404/`}
+			/>
+		</noscript>
+	</head>
+</html>

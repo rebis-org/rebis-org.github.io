@@ -1,0 +1,42 @@
+name: Preview
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          submodules: true
+      - uses: nubjs/setup-nub@v0
+        with:
+          node-version-file: .node-version
+          cache: true
+      - run: nub ci
+      - uses: actions/cache@v6.1.0
+        with:
+          path: node_modules/.astro
+          key: astro-incremental-${{ runner.os }}-${{ hashFiles('astro.config.ts', 'nub.lock') }}
+          restore-keys: |
+            astro-incremental-${{ runner.os }}-
+      - name: Build
+        run: nub run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          CI: true
+      - name: Deploy preview to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=rebis-org --branch=preview-${{ github.event.number }}

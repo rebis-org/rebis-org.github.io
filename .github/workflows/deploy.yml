@@ -1,0 +1,63 @@
+name: Deploy
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: "deploy"
+  cancel-in-progress: false
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v6
+      - uses: nubjs/setup-nub@v0
+        with:
+          node-version-file: .node-version
+          cache: true
+      - run: nub ci
+      - uses: actions/cache@v6.1.0
+        with:
+          path: node_modules/.astro
+          key: astro-incremental-${{ runner.os }}-${{ hashFiles('astro.config.ts', 'nub.lock') }}
+          restore-keys: |
+            astro-incremental-${{ runner.os }}-
+      - name: Build
+        run: nub run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          CI: true
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./dist
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=rebis-org --branch=main
+  deploy-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

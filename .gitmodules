@@ -1,0 +1,3 @@
+[submodule "vendor/astro"]
+	path = vendor/astro
+	url = https://github.com/withastro/astro.git

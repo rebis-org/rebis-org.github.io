@@ -1,0 +1,61 @@
+{
+	"name": "rebis-org.github.io",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "astro build && jiti ./scripts/seal.ts",
+		"check": "astro check",
+		"dev": "astro dev",
+		"headers": "npm run build && jiti ./scripts/headers.ts",
+		"fmt": "node_modules/.bin/oxfmt .oxfmtrc.json .oxlintrc.json astro.config.ts package.json scripts src .github '!src/posts'",
+		"fmt:check": "node_modules/.bin/oxfmt .oxfmtrc.json .oxlintrc.json astro.config.ts package.json scripts src .github '!src/posts' --check",
+		"lint": "vp lint -c .oxlintrc.json astro.config.ts scripts/*.ts src/*.ts src/*/*.ts src/*/*/*.ts",
+		"quality": "npm run lint && npm run fmt:check",
+		"preview": "astro preview"
+	},
+	"dependencies": {
+		"@astrojs/markdown-satteri": "0.4.5",
+		"@astrojs/mdx": "^8.1.1",
+		"@astrojs/rss": "^4.0.19",
+		"@astrojs/sitemap": "^3.7.4",
+		"@shikijs/transformers": "^4.5.0",
+		"@unocss/astro": "66.11.0",
+		"@unocss/preset-typography": "66.11.0",
+		"@unocss/preset-wind4": "66.11.0",
+		"@unocss/transformer-variant-group": "66.11.0",
+		"astro": "7.4.2",
+		"katex": "^0.19.1",
+		"lucide": "^1.61.0",
+		"mermaid": "^12.2.0",
+		"morphicons": "^2.0.2",
+		"pangu": "10.4.1",
+		"satteri": "^0.10.5",
+		"valibot": "^1.5.0"
+	},
+	"devDependencies": {
+		"@astrojs/check": "0.9.12",
+		"@astrojs/compiler-rs": "^0.5.2",
+		"@types/node": "^26.6.5",
+		"jiti": "^2.7.0",
+		"lightningcss": "^1.33.0",
+		"oxfmt": "^0.74.0",
+		"typescript": "6.0.3",
+		"wrangler": "^4.152.0"
+	},
+	"devEngines": {
+		"packageManager": {
+			"name": "nub",
+			"version": "^0.9.6",
+			"onFail": "warn"
+		}
+	},
+	"allowScripts": {
+		"esbuild": true,
+		"lightningcss": true,
+		"core-js": true,
+		"workerd": true
+	},
+	"patchedDependencies": {
+		"@astrojs/markdown-satteri@0.4.5": "patches/@astrojs+markdown-satteri@0.4.5.patch"
+	}
+}
